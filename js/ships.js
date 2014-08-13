@@ -211,9 +211,12 @@ Ship.prototype.fire = function(target) {
         {
             this.nextFire = this.game.time.now + this.fireRate;
             var bullet = this.bullets.getFirstDead();
-            bullet.reset(this.turret.x, this.turret.y);
+            // Using sin and cos to add offset in direction tank is facing
+            bullet.reset(this.turret.x + Math.cos(this.turret.rotation)*50, this.turret.y + Math.sin(this.turret.rotation)*50);
 
-			bullet.rotation = this.game.physics.arcade.moveToObject(bullet, target, 500);
+
+			bullet.rotation = this.turret.rotation;
+			game.physics.arcade.velocityFromRotation(this.turret.rotation, 800, bullet.body.velocity);
         }
 }
 
