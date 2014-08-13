@@ -9,7 +9,7 @@
 	"sourceSize": {"w":80,"h":80}
 },
 {
-	"filename": "tank1",
+	"filename": "ship1",
 	"frame": {"x":190,"y":52,"w":54,"h":52},
 	"rotated": false,
 	"trimmed": true,
@@ -17,7 +17,7 @@
 	"sourceSize": {"w":64,"h":64}
 },
 {
-	"filename": "tank2",
+	"filename": "ship2",
 	"frame": {"x":136,"y":52,"w":54,"h":52},
 	"rotated": false,
 	"trimmed": true,
@@ -25,7 +25,7 @@
 	"sourceSize": {"w":64,"h":64}
 },
 {
-	"filename": "tank3",
+	"filename": "ship3",
 	"frame": {"x":80,"y":54,"w":56,"h":54},
 	"rotated": false,
 	"trimmed": true,
@@ -33,7 +33,7 @@
 	"sourceSize": {"w":64,"h":64}
 },
 {
-	"filename": "tank4",
+	"filename": "ship4",
 	"frame": {"x":190,"y":0,"w":54,"h":52},
 	"rotated": false,
 	"trimmed": true,
@@ -41,7 +41,7 @@
 	"sourceSize": {"w":64,"h":64}
 },
 {
-	"filename": "tank5",
+	"filename": "ship5",
 	"frame": {"x":136,"y":0,"w":54,"h":52},
 	"rotated": false,
 	"trimmed": true,
@@ -49,7 +49,7 @@
 	"sourceSize": {"w":64,"h":64}
 },
 {
-	"filename": "tank6",
+	"filename": "ship6",
 	"frame": {"x":80,"y":0,"w":56,"h":54},
 	"rotated": false,
 	"trimmed": true,
@@ -75,7 +75,7 @@
 "meta": {
 	"app": "http://www.codeandweb.com/texturepacker ",
 	"version": "1.0",
-	"image": "tanks.png",
+	"image": "ships.png",
 	"format": "RGBA8888",
 	"size": {"w":244,"h":108},
 	"scale": "1",

@@ -243,7 +243,7 @@ function preload () {
 function create () {
 
     //  Resize our game world to be a 2000 x 2000 square
-    game.world.setBounds(-1000, -1000, 2000, 2000);
+    game.world.setBounds(0, 0, 2000, 2000);
 	game.stage.disableVisibilityChange  = true;
 	
     //  Our tiled scrolling background
@@ -256,8 +256,8 @@ function create () {
 	shipsList[myId] = player;
 	ship = player.ship;
 	turret = player.turret;
-	ship.x=0;
-	ship.y=0;
+	ship.x= Math.floor(Math.random() * 2000) + 1
+	ship.y= Math.floor(Math.random() * 2000) + 1
 	bullets = player.bullets;
 	shadow = player.shadow;	
 
@@ -279,7 +279,7 @@ function create () {
     game.input.onDown.add(removeLogo, this);
 
     game.camera.follow(ship);
-    game.camera.deadzone = new Phaser.Rectangle(150, 150, 500, 300);
+    // game.camera.deadzone = new Phaser.Rectangle(150, 150, 500, 300);
     game.camera.focusOnXY(0, 0);
 
     cursors = game.input.keyboard.createCursorKeys();
@@ -307,7 +307,7 @@ function update () {
 	
 	
 	
-	turret.rotation = game.physics.arcade.angleToPointer(turret);	
+	turret.rotation = ship.rotation
     land.tilePosition.x = -game.camera.x;
     land.tilePosition.y = -game.camera.y;
 
