@@ -48,11 +48,11 @@ var eurecaClientSetup = function() {
 	
 	eurecaClient.exports.spawnEnemy = function(i, x, y)
 	{
-		
 		if (i == myId) return; //this is me
 		
-		if(shipsList[i]) {console.log("trying to create existing ship")}
-		else{
+		console.log('SPAWN');
+		if(shipsList[i]) console.log("Trying to create new ship")
+		else {
 			var shp = new Ship(i, game, ship);
 			shipsList[i] = shp;
 		}
@@ -73,6 +73,7 @@ var eurecaClientSetup = function() {
 
 
 Ship = function (index, game, player) {
+	console.log("new ship created")
 	this.cursor = {
 		left:false,
 		right:false,
@@ -87,8 +88,10 @@ Ship = function (index, game, player) {
 		fire:false
 	}
 
-    var x = 100;
-    var y = 100;
+    // var x = Math.floor(Math.random() * 2000) + 1
+    var x = 0
+    var y = 0
+    // var y = Math.floor(Math.random() * 2000) + 1
 
     this.game = game;
     this.health = 30;
@@ -200,6 +203,7 @@ Ship.prototype.update = function() {
     this.shadow.x = this.ship.x;
     this.shadow.y = this.ship.y;
     this.shadow.rotation = this.ship.rotation;
+    this.turret.rotation = this.ship.rotation;
 
     this.turret.x = this.ship.x;
     this.turret.y = this.ship.y;
