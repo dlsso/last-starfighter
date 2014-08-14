@@ -51,9 +51,11 @@ var eurecaClientSetup = function() {
 		
 		if (i == myId) return; //this is me
 		
-		console.log('SPAWN');
-		var shp = new Ship(i, game, ship);
-		shipsList[i] = shp;
+		if(shipsList[i]) {console.log("trying to create existing ship")}
+		else{
+			var shp = new Ship(i, game, ship);
+			shipsList[i] = shp;
+		}
 	}
 	
 	eurecaClient.exports.updateState = function(id, state)
@@ -85,8 +87,8 @@ Ship = function (index, game, player) {
 		fire:false
 	}
 
-    var x = 0;
-    var y = 0;
+    var x = 100;
+    var y = 100;
 
     this.game = game;
     this.health = 30;
@@ -243,7 +245,6 @@ function preload () {
 
 
 function create () {
-
     //  Resize our game world to be a 2000 x 2000 square
     game.world.setBounds(0, 0, 2000, 2000);
 	game.stage.disableVisibilityChange  = true;
@@ -253,13 +254,14 @@ function create () {
     land.fixedToCamera = true;
     
     shipsList = {};
-	
 	player = new Ship(myId, game, ship);
 	shipsList[myId] = player;
 	ship = player.ship;
 	turret = player.turret;
-	ship.x= Math.floor(Math.random() * 2000) + 1
-	ship.y= Math.floor(Math.random() * 2000) + 1
+	// ship.x= Math.floor(Math.random() * 2000) + 1
+	ship.x= 200
+	// ship.y= Math.floor(Math.random() * 2000) + 1
+	ship.y= 200
 	bullets = player.bullets;
 	shadow = player.shadow;
     //  Explosion pool
@@ -340,8 +342,9 @@ function update () {
 }
 
 function bulletHitPlayer (ship, bullet) {
-
     bullet.kill();
+    // shipsList[ship.id].kill() // This works but only client side?
+    // eurecaClientSetup.eurecaClient.kill(ship.id)
 }
 
 function render () {}
