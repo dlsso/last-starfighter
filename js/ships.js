@@ -52,8 +52,8 @@ var eurecaClientSetup = function() {
 		if (i == myId) return; //this is me
 		
 		console.log('SPAWN');
-		var tnk = new Ship(i, game, ship);
-		shipsList[i] = tnk;
+		var shp = new Ship(i, game, ship);
+		shipsList[i] = shp;
 	}
 	
 	eurecaClient.exports.updateState = function(id, state)
@@ -127,6 +127,7 @@ Ship = function (index, game, player) {
 };
 
 Ship.prototype.update = function() {
+
 	
 	var inputChanged = (
 		this.cursor.left != this.input.left ||
@@ -156,14 +157,14 @@ Ship.prototype.update = function() {
 
 	//cursor value is now updated by eurecaClient.exports.updateState method
 	
-	
+
     if (this.cursor.left)
     {
-        this.ship.angle -= 3;
+        this.ship.angle -= 4;
     }
     else if (this.cursor.right)
     {
-        this.ship.angle += 3;
+        this.ship.angle += 4;
     }	
     if (this.cursor.up)
     {
@@ -192,8 +193,6 @@ Ship.prototype.update = function() {
 	{
 		game.physics.arcade.velocityFromRotation(this.ship.rotation, 0, this.ship.body.velocity);
 	}
-	
-	
 	
 	
     this.shadow.x = this.ship.x;
@@ -262,8 +261,7 @@ function create () {
 	ship.x= Math.floor(Math.random() * 2000) + 1
 	ship.y= Math.floor(Math.random() * 2000) + 1
 	bullets = player.bullets;
-	shadow = player.shadow;	
-
+	shadow = player.shadow;
     //  Explosion pool
     explosions = game.add.group();
 
@@ -321,6 +319,7 @@ function update () {
 		if (!shipsList[i]) continue;
 		var curBullets = shipsList[i].bullets;
 		var curShip = shipsList[i].ship;
+		if (shipsList[i].alive) shipsList[i].update();
 		for (var j in shipsList)
 		{
 			if (!shipsList[j]) continue;
@@ -332,7 +331,7 @@ function update () {
 				game.physics.arcade.overlap(curBullets, targetShip, bulletHitPlayer, null, this);
 			
 			}
-			if (shipsList[j].alive)
+			if (!shipsList[j].alive)
 			{
 				shipsList[j].update();
 			}			
