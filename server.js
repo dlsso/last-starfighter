@@ -34,6 +34,8 @@ eurecaServer.onConnect(function (conn) {
 	
 	//here we call setId (defined in the client side)
 	remote.setId(conn.id);	
+
+	// eurecaServer.exports.playerJustLoggedIn = function() {console.log("player logged in")}
 });
 
 //detect client disconnection

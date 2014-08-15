@@ -14,6 +14,7 @@ var viewportWidth = window.innerWidth * window.devicePixelRatio;
 var viewportHeight = window.innerHeight * window.devicePixelRatio;
 var fireRate = 400;
 var nextFire = 0;
+var newLogin = false
 
 var ready = false;
 var eurecaServer;
@@ -25,7 +26,6 @@ var eurecaClientSetup = function() {
 	eurecaClient.ready(function (proxy) {		
 		eurecaServer = proxy;
 	});
-	
 	
 	//methods defined under "exports" namespace become available in the server side
 	
@@ -42,7 +42,7 @@ var eurecaClientSetup = function() {
 	{	
 		if (shipsList[id]) {
 			shipsList[id].kill();
-			console.log('killing ', id, shipsList[id]);
+			// console.log('killing ', id, shipsList[id]);
 		}
 	}	
 	
@@ -56,6 +56,7 @@ var eurecaClientSetup = function() {
 		else {
 			var shp = new Ship(i, game, ship, x, y);
 			shipsList[i] = shp;
+			newLogin = true
 		}
 	}
 	
@@ -92,7 +93,6 @@ Ship = function (index, game, player, x, y) {
     // var x = 100
     // var y = 100
     // var y = Math.floor(Math.random() * 2000) + 1
-    console.log("x,y:", x,y)
 
 
     this.game = game;
@@ -135,7 +135,9 @@ Ship = function (index, game, player, x, y) {
 
 Ship.prototype.update = function() {
 
-	
+	// eurecaServer.playerJustLoggedIn()
+
+
 	var inputChanged = (
 		this.cursor.left != this.input.left ||
 		this.cursor.right != this.input.right ||
@@ -144,7 +146,7 @@ Ship.prototype.update = function() {
 	);
 	
 	
-	if (inputChanged)
+	if (inputChanged || newLogin === true)
 	{
 		//Handle input change here
 		//send new values to the server		
@@ -158,9 +160,10 @@ Ship.prototype.update = function() {
 			
 			
 			eurecaServer.handleKeys(this.input);
-			
+			newLogin = false		
 		}
 	}
+
 
 	//cursor value is now updated by eurecaClient.exports.updateState method
 	
