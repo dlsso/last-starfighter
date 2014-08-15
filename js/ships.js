@@ -49,11 +49,12 @@ var eurecaClientSetup = function() {
 	eurecaClient.exports.spawnEnemy = function(i, x, y)
 	{
 		if (i == myId) return; //this is me
-		
 		console.log('SPAWN');
-		if(shipsList[i]) console.log("Trying to create new ship")
+		if(shipsList[i]) {
+			console.log("Trying to create a ship that already exists.")
+		}
 		else {
-			var shp = new Ship(i, game, ship);
+			var shp = new Ship(i, game, ship, x, y);
 			shipsList[i] = shp;
 		}
 	}
@@ -72,8 +73,7 @@ var eurecaClientSetup = function() {
 }
 
 
-Ship = function (index, game, player) {
-	console.log("new ship created")
+Ship = function (index, game, player, x, y) {
 	this.cursor = {
 		left:false,
 		right:false,
@@ -89,9 +89,11 @@ Ship = function (index, game, player) {
 	}
 
     // var x = Math.floor(Math.random() * 2000) + 1
-    var x = 0
-    var y = 0
+    // var x = 100
+    // var y = 100
     // var y = Math.floor(Math.random() * 2000) + 1
+    console.log("x,y:", x,y)
+
 
     this.game = game;
     this.health = 30;
@@ -250,7 +252,7 @@ function preload () {
 
 function create () {
     //  Resize our game world to be a 2000 x 2000 square
-    game.world.setBounds(0, 0, 2000, 2000);
+    game.world.setBounds(0, 0, 1000, 1000);
 	game.stage.disableVisibilityChange  = true;
 	
     //  Our tiled scrolling background
@@ -262,10 +264,12 @@ function create () {
 	shipsList[myId] = player;
 	ship = player.ship;
 	turret = player.turret;
-	// ship.x= Math.floor(Math.random() * 2000) + 1
-	ship.x= 200
-	// ship.y= Math.floor(Math.random() * 2000) + 1
-	ship.y= 200
+	// ship.x= Math.floor(Math.random() * 1000) + 1
+	ship.x= game.world.randomX 
+	// ship.x= 200
+	// ship.y= Math.floor(Math.random() * 1000) + 1
+	ship.y= game.world.randomY
+	// ship.y= 200
 	bullets = player.bullets;
 	shadow = player.shadow;
     //  Explosion pool
@@ -293,7 +297,14 @@ function create () {
     fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 	
 	setTimeout(removeLogo, 1000);
-	
+
+	var keys = {
+		x: ship.x,
+		y: ship.y,
+		angle: ship.angle,
+		rot: ship.rotation
+	}
+	eurecaServer.handleKeys(keys);
 }
 
 function removeLogo () {
