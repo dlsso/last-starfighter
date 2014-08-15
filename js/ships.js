@@ -9,6 +9,7 @@ var logo;
 var cursors;
 var fireButton;
 var bullets;
+var restartButton;
 var myId=0;
 var viewportWidth = window.innerWidth * window.devicePixelRatio;
 var viewportHeight = window.innerHeight * window.devicePixelRatio;
@@ -68,6 +69,7 @@ var eurecaClientSetup = function() {
 			shipsList[id].ship.y = state.y;
 			shipsList[id].ship.angle = state.angle;
 			shipsList[id].turret.rotation = state.rot;
+			shipsList[id].alive = state.alive;
 			shipsList[id].update();
 		}
 	}
@@ -157,8 +159,8 @@ Ship.prototype.update = function() {
 			this.input.y = this.ship.y;
 			this.input.angle = this.ship.angle;
 			this.input.rot = this.turret.rotation;
-			
-			
+			this.input.alive = this.ship.alive;
+
 			eurecaServer.handleKeys(this.input);
 			newLogin = false		
 		}
@@ -248,7 +250,7 @@ function preload () {
     game.load.image('bullet', 'assets/bullet.png');
     game.load.image('earth', 'assets/scorched_earth.png');
     game.load.spritesheet('kaboom', 'assets/explosion.png', 64, 64, 23);
-    
+    game.load.image('restart','assets/restart.png'); 
 }
 
 
@@ -305,7 +307,8 @@ function create () {
 		x: ship.x,
 		y: ship.y,
 		angle: ship.angle,
-		rot: ship.rotation
+		rot: ship.rotation,
+		alive: this.ship.alive
 	}
 	eurecaServer.handleKeys(keys);
 }
@@ -326,13 +329,9 @@ function update () {
 	player.input.tx = game.input.x+ game.camera.x;
 	player.input.ty = game.input.y+ game.camera.y;
 	
-	
-	
 	turret.rotation = ship.rotation
     land.tilePosition.x = -game.camera.x;
     land.tilePosition.y = -game.camera.y;
-
-    	
 	
     for (var i in shipsList)
     {
@@ -361,8 +360,17 @@ function update () {
 
 function bulletHitPlayer (ship, bullet) {
     bullet.kill();
-    // shipsList[ship.id].kill() // This works but only client side?
-    // eurecaClientSetup.eurecaClient.kill(ship.id)
+    console.log("ship:", ship)
+    if(myId === ship.id){
+	    restartButton = game.add.button(200, 200, 'restart', restart, this);
+	    restartButton.fixedToCamera = true
+	}
+    
+    eurecaServer.deletePlayer(ship.id) // Delete server side?
+}
+
+function restart () {
+	// restart player
 }
 
 function render () {}

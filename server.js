@@ -34,15 +34,13 @@ eurecaServer.onConnect(function (conn) {
 	
 	//here we call setId (defined in the client side)
 	remote.setId(conn.id);	
-
-	// eurecaServer.exports.playerJustLoggedIn = function() {console.log("player logged in")}
 });
 
 //detect client disconnection
 eurecaServer.onDisconnect(function (conn) {    
     console.log('Client disconnected ', conn.id);
 	
-	var removeId = clients[conn.id].id;
+	// var removeId = clients[conn.id].id;
 	
 	delete clients[conn.id];
 	
@@ -54,6 +52,17 @@ eurecaServer.onDisconnect(function (conn) {
 		remote.kill(conn.id);
 	}	
 });
+
+eurecaServer.exports.deletePlayer = function(id) {
+	
+	clients[id].laststate.alive = false;
+	for (var c in clients)
+	{
+		var remote = clients[c].remote;
+		//here we call kill() method defined in the client side
+		remote.kill(id);
+	}	
+}
 
 
 eurecaServer.exports.handshake = function()
@@ -67,7 +76,9 @@ eurecaServer.exports.handshake = function()
 			var x = clients[cc].laststate ? clients[cc].laststate.x:  0;
 			var y = clients[cc].laststate ? clients[cc].laststate.y:  0;
 
-			remote.spawnEnemy(clients[cc].id, x, y);		
+			if(clients[cc].laststate && clients[cc].laststate.alive){
+				remote.spawnEnemy(clients[cc].id, x, y);		
+			}
 		}
 	}
 }
@@ -77,14 +88,13 @@ eurecaServer.exports.handshake = function()
 eurecaServer.exports.handleKeys = function (keys) {
 	var conn = this.connection;
 	var updatedClient = clients[conn.id];
-	
+	updatedClient.laststate = keys;
+
 	for (var c in clients)
 	{
 		var remote = clients[c].remote;
 		remote.updateState(updatedClient.id, keys);
-		
 		//keep last known state so we can send it to new connected clients
-		clients[c].laststate = keys;
 	}
 }
 server.listen(8000);
