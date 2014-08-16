@@ -414,7 +414,7 @@ function update () {
 function bulletHitPlayer (ship, bullet) {
     bullet.kill();
     console.log("ship:", ship)
-    eurecaServer.deletePlayer(ship.id)
+    setTimeout(function(){eurecaServer.deletePlayer(ship.id)},40)
     // if (destroyed)
     // {
         var explosionAnimation = explosions.getFirstExists(false);
