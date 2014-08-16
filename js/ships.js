@@ -399,13 +399,14 @@ function update () {
 			{
 			
 				var targetShip = shipsList[j].ship;
-				
+				// game.physics.arcade.collide(curShip, targetShip);
 				game.physics.arcade.overlap(curBullets, targetShip, bulletHitPlayer, null, this);
+				game.physics.arcade.overlap(curShip, targetShip, shipsCollide, null, this);
 			
 			}
 			if (!shipsList[j].alive)
 			{
-				shipsList[j].update();
+				// shipsList[j].update();
 			}			
 		}
     }
@@ -414,7 +415,6 @@ function update () {
 function bulletHitPlayer (ship, bullet) {
     bullet.kill();
     shipsList[ship.id].health -= 10
-    console.log("ship.health:", ship.health)
     if (shipsList[ship.id].health<=0)
     {
         var explosionAnimation = explosions.getFirstExists(false);
@@ -423,6 +423,15 @@ function bulletHitPlayer (ship, bullet) {
     	setTimeout(function(){eurecaServer.deletePlayer(ship.id)},40)
     }
 
+}
+
+function shipsCollide (ship, curShip) {
+    setTimeout(function(){
+		eurecaServer.deletePlayer(ship.id)
+        var explosionAnimation = explosions.getFirstExists(false);
+        explosionAnimation.reset(ship.x, ship.y);
+        explosionAnimation.play('kaboom', 30, false, true);
+    },40)
 }
 
 function restart () {
