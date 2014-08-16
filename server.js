@@ -70,13 +70,17 @@ eurecaServer.exports.handshake = function()
 	for (var c in clients)
 	{
 		var remote = clients[c].remote;
+		console.log(clients[c])
 		for (var cc in clients)
 		{		
 			//send latest known position
 			var x = clients[cc].laststate ? clients[cc].laststate.x:  0;
 			var y = clients[cc].laststate ? clients[cc].laststate.y:  0;
 
+
+
 			if(clients[cc].laststate && clients[cc].laststate.alive){
+
 				remote.spawnEnemy(clients[cc].id, x, y);		
 			}
 		}
