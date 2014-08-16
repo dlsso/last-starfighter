@@ -274,17 +274,13 @@ function create () {
 	shipsList[myId] = player;
 	ship = player.ship;
 	turret = player.turret;
-	// ship.x= Math.floor(Math.random() * 1000) + 1
 	ship.x= game.world.randomX 
-	// ship.x= 200
-	// ship.y= Math.floor(Math.random() * 1000) + 1
 	ship.y= game.world.randomY
-	// ship.y= 200
 	bullets = player.bullets;
 	shadow = player.shadow;
+
     //  Explosion pool
     explosions = game.add.group();
-
     for (var i = 0; i < 10; i++)
     {
         var explosionAnimation = explosions.create(0, 0, 'kaboom', [0], false);
@@ -300,7 +296,6 @@ function create () {
     game.input.onDown.add(removeLogo, this);
 
     game.camera.follow(ship);
-    // game.camera.deadzone = new Phaser.Rectangle(150, 150, 500, 300);
     game.camera.focusOnXY(0, 0);
 
     cursors = game.input.keyboard.createCursorKeys();
@@ -320,8 +315,8 @@ function create () {
 
 function respawn () {
     //  Resize our game world to be a 2000 x 2000 square
-    game.world.setBounds(0, 0, 1000, 1000);
-	game.stage.disableVisibilityChange  = true;
+    // game.world.setBounds(0, 0, 1000, 1000);
+	// game.stage.disableVisibilityChange  = true;
 	
     //  Our tiled scrolling background
     land = game.add.tileSprite(0, 0, viewportWidth, viewportHeight, 'earth');
@@ -334,8 +329,8 @@ function respawn () {
 	turret = player.turret;
 	ship.x= game.world.randomX 
 	ship.y= game.world.randomY
-	bullets = player.bullets;
-	shadow = player.shadow;
+	// bullets = player.bullets;
+	// shadow = player.shadow;
     //  Explosion pool
     explosions = game.add.group();
 
@@ -349,17 +344,17 @@ function respawn () {
     ship.bringToTop();
     turret.bringToTop();
 		
-    logo = game.add.sprite(0, 200, 'logo');
-    logo.fixedToCamera = true;
-    game.input.onDown.add(removeLogo, this);
+    // logo = game.add.sprite(0, 200, 'logo');
+    // logo.fixedToCamera = true;
+    // game.input.onDown.add(removeLogo, this);
+	// setTimeout(removeLogo, 1000);
 
     game.camera.follow(ship);
     game.camera.focusOnXY(0, 0);
 
-    cursors = game.input.keyboard.createCursorKeys();
-    fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+    // cursors = game.input.keyboard.createCursorKeys();
+    // fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 	
-	setTimeout(removeLogo, 1000);
 
 	var keys = {
 		x: ship.x,
@@ -419,69 +414,22 @@ function update () {
 function bulletHitPlayer (ship, bullet) {
     bullet.kill();
     console.log("ship:", ship)
-    eurecaServer.deletePlayer(ship.id) // Delete server side?
+    eurecaServer.deletePlayer(ship.id)
+    // if (destroyed)
+    // {
+        var explosionAnimation = explosions.getFirstExists(false);
+        explosionAnimation.reset(ship.x, ship.y);
+        explosionAnimation.play('kaboom', 30, false, true);
+    // }
+
 }
 
 function restart () {
-
 	restartButton.kill()
-
-	// This works but invisible to other players
-		ready = false;
-		respawn();
-		eurecaServer.handshake();
-		ready = true;
-
-
-
-
-		// console.log("myId, ship.x, ship.y:", myId, ship.x, ship.y)
-
-		// if (ship.id == myId) return; //this is me
-		// console.log('SPAWN');
-		// if(shipsList[ship.id]) {
-		// 	console.log("Trying to create a ship that already exists.")
-		// }
-		// else {
-		// 	var shp = new Ship(ship.id, game, ship, ship.x, ship.y);
-		// 	shipsList[ship.id] = shp;
-		// 	newLogin = true
-		// }
-	
-	// This doesn't work
-	// var keys = {
-	// 	x: game.world.randomX,
-	// 	y: game.world.randomY,
-	// 	angle: 0,
-	// 	rot: 0,
-	// 	alive: true
-	// }
-	// eurecaServer.handleKeys(keys);
-	
-	// player = new Ship(myId, game, ship);
-	// shipsList[myId] = player;
-	// ship = player.ship;
-	// turret = player.turret;
-	// // ship.x= Math.floor(Math.random() * 1000) + 1
-	// ship.x= game.world.randomX 
-	// // ship.x= 200
-	// // ship.y= Math.floor(Math.random() * 1000) + 1
-	// ship.y= game.world.randomY
-	// game.camera.follow(ship);
- //    // game.camera.deadzone = new Phaser.Rectangle(150, 150, 500, 300);
- //    game.camera.focusOnXY(0, 0);
-
- //    	var keys = {
-	// 	x: ship.x,
-	// 	y: ship.y,
-	// 	angle: ship.angle,
-	// 	rot: ship.rotation,
-	// 	alive: this.ship.alive
-	// }
-	// eurecaServer.handleKeys(keys);
-
-
-		
+	ready = false;
+	respawn();
+	eurecaServer.handshake();
+	ready = true;		
 }
 
 function render () {}
