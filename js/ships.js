@@ -413,14 +413,15 @@ function update () {
 
 function bulletHitPlayer (ship, bullet) {
     bullet.kill();
-    console.log("ship:", ship)
-    setTimeout(function(){eurecaServer.deletePlayer(ship.id)},40)
-    // if (destroyed)
-    // {
+    shipsList[ship.id].health -= 10
+    console.log("ship.health:", ship.health)
+    if (shipsList[ship.id].health<=0)
+    {
         var explosionAnimation = explosions.getFirstExists(false);
         explosionAnimation.reset(ship.x, ship.y);
         explosionAnimation.play('kaboom', 30, false, true);
-    // }
+    	setTimeout(function(){eurecaServer.deletePlayer(ship.id)},40)
+    }
 
 }
 
