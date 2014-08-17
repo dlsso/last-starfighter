@@ -70,7 +70,6 @@ eurecaServer.exports.handshake = function()
 	for (var c in clients)
 	{
 		var remote = clients[c].remote;
-		console.log(clients[c])
 		for (var cc in clients)
 		{		
 			//send latest known position

@@ -1,7 +1,7 @@
 var land;
 var shadow;
 var ship;
-var turret;
+// var turret;
 var player;
 var shipsList;
 var explosions;
@@ -73,7 +73,7 @@ var eurecaClientSetup = function() {
 			shipsList[id].ship.x = state.x;
 			shipsList[id].ship.y = state.y;
 			shipsList[id].ship.angle = state.angle;
-			shipsList[id].turret.rotation = state.rot;
+			// shipsList[id].turret.rotation = state.rot;
 			shipsList[id].alive = state.alive;
 			shipsList[id].update();
 		}
@@ -122,19 +122,21 @@ Ship = function (index, game, player, x, y) {
 
 	this.shadow = game.add.sprite(x, y, 'enemy', 'shadow');
 	this.ship = game.add.sprite(x, y, 'enemy', 'ship1');
-	this.turret = game.add.sprite(x, y, 'enemy', 'turret');
+	// this.turret = game.add.sprite(x, y, 'enemy', 'turret');
 
 	this.shadow.anchor.set(0.5);
 	this.ship.anchor.set(0.5);
-	this.turret.anchor.set(0.3, 0.5);
+	// this.turret.anchor.set(0.3, 0.5);
 
 	this.ship.id = index;
 	game.physics.enable(this.ship, Phaser.Physics.ARCADE);
 	this.ship.body.immovable = false;
+	this.ship.body.drag.setTo(50);
+	this.ship.body.maxVelocity.setTo(220);
 	this.ship.body.collideWorldBounds = true;
 	this.ship.body.bounce.setTo(0, 0);
 
-	this.ship.angle = 0;
+	this.ship.angle = -90;
 
 	game.physics.arcade.velocityFromRotation(this.ship.rotation, 0, this.ship.body.velocity);
 
@@ -163,7 +165,7 @@ Ship.prototype.update = function() {
 			this.input.x = this.ship.x;
 			this.input.y = this.ship.y;
 			this.input.angle = this.ship.angle;
-			this.input.rot = this.turret.rotation;
+			// this.input.rot = this.turret.rotation;
 			this.input.alive = this.ship.alive;
 
 			eurecaServer.handleKeys(this.input);
@@ -185,25 +187,17 @@ Ship.prototype.update = function() {
 	}	
 	if (this.cursor.up)
 	{
-		//  The speed we'll travel at
 		this.ship.body.velocity.x += Math.cos(this.ship.rotation)*10
 		this.ship.body.velocity.y += Math.sin(this.ship.rotation)*10
+	}
 
-	}
-	else
-	{
-		if (this.currentSpeed > 0)
-		{
-			this.currentSpeed -= 2;
-		}
-	}
 	if (this.cursor.fire)
 	{	
 		this.fire({x:this.cursor.tx, y:this.cursor.ty});
 	}
 	// The *.4 creates a parallax scrolling effect
-	land.tilePosition.x = -game.camera.x*.4;
-	land.tilePosition.y = -game.camera.y*.4;	
+	land.tilePosition.x = -game.camera.x*.2;
+	land.tilePosition.y = -game.camera.y*.2;	
 
 	if(this.cursor.up) slideDirection = this.ship.rotation
 	
@@ -216,10 +210,10 @@ Ship.prototype.update = function() {
 	this.shadow.x = this.ship.x;
 	this.shadow.y = this.ship.y;
 	this.shadow.rotation = this.ship.rotation;
-	this.turret.rotation = this.ship.rotation;
+	// this.turret.rotation = this.ship.rotation;
 
-	this.turret.x = this.ship.x;
-	this.turret.y = this.ship.y;
+	// this.turret.x = this.ship.x;
+	// this.turret.y = this.ship.y;
 };
 
 
@@ -230,11 +224,11 @@ Ship.prototype.fire = function(target) {
 			this.nextFire = this.game.time.now + this.fireRate;
 			var bullet = this.bullets.getFirstDead();
 			// Using sin and cos to add offset in direction tank is facing
-			bullet.reset(this.turret.x + Math.cos(this.turret.rotation)*50, this.turret.y + Math.sin(this.turret.rotation)*50);
+			bullet.reset(this.ship.x + Math.cos(this.ship.rotation)*50, this.ship.y + Math.sin(this.ship.rotation)*50);
 
 
-			bullet.rotation = this.turret.rotation;
-			game.physics.arcade.velocityFromRotation(this.turret.rotation, 800, bullet.body.velocity);
+			bullet.rotation = this.ship.rotation;
+			game.physics.arcade.velocityFromRotation(this.ship.rotation, 800, bullet.body.velocity);
 		}
 }
 
@@ -242,7 +236,7 @@ Ship.prototype.fire = function(target) {
 Ship.prototype.kill = function() {
 	this.alive = false;
 	this.ship.kill();
-	this.turret.kill();
+	// this.turret.kill();
 	this.shadow.kill();
 }
 
@@ -263,7 +257,7 @@ function preload () {
 
 function create () {
 	//  Resize our game world to be a 2000 x 2000 square
-	game.world.setBounds(0, 0, 1000, 1000);
+	game.world.setBounds(0, 0, 2000, 2000);
 	game.stage.disableVisibilityChange  = true;
 	
 	//  Our tiled scrolling background
@@ -274,7 +268,7 @@ function create () {
 	player = new Ship(myId, game, ship);
 	shipsList[myId] = player;
 	ship = player.ship;
-	turret = player.turret;
+	// turret = player.turret;
 	ship.x= game.world.randomX 
 	ship.y= game.world.randomY
 	bullets = player.bullets;
@@ -290,7 +284,7 @@ function create () {
 	}
 
 	ship.bringToTop();
-	turret.bringToTop();
+	// turret.bringToTop();
 		
 	logo = game.add.sprite(0, 200, 'logo');
 	logo.fixedToCamera = true;
@@ -327,7 +321,7 @@ function respawn () {
 	player = new Ship(myId, game, ship);
 	shipsList[myId] = player;
 	ship = player.ship;
-	turret = player.turret;
+	// turret = player.turret;
 	ship.x= game.world.randomX 
 	ship.y= game.world.randomY
 	// bullets = player.bullets;
@@ -343,7 +337,7 @@ function respawn () {
 	}
 
 	ship.bringToTop();
-	turret.bringToTop();
+	// turret.bringToTop();
 		
 	// logo = game.add.sprite(0, 200, 'logo');
 	// logo.fixedToCamera = true;
