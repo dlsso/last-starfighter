@@ -1,5 +1,5 @@
 var land;
-var shadow;
+// var shadow;
 var ship;
 // var turret;
 var player;
@@ -120,11 +120,12 @@ Ship = function (index, game, player, x, y) {
 	this.nextFire = 0;
 	this.alive = true;
 
-	this.shadow = game.add.sprite(x, y, 'enemy', 'shadow');
-	this.ship = game.add.sprite(x, y, 'enemy', 'ship1');
+	// this.shadow = game.add.sprite(x, y, 'enemy', 'shadow');
+	this.ship = game.add.sprite(x, y, 'ship');
+	this.ship.animations.add('engines', [1, 2], 20, true);
 	// this.turret = game.add.sprite(x, y, 'enemy', 'turret');
 
-	this.shadow.anchor.set(0.5);
+	// this.shadow.anchor.set(0.5);
 	this.ship.anchor.set(0.5);
 	// this.turret.anchor.set(0.3, 0.5);
 
@@ -136,7 +137,7 @@ Ship = function (index, game, player, x, y) {
 	this.ship.body.collideWorldBounds = true;
 	this.ship.body.bounce.setTo(0, 0);
 
-	this.ship.angle = -90;
+	this.ship.angle = 0;
 
 	game.physics.arcade.velocityFromRotation(this.ship.rotation, 0, this.ship.body.velocity);
 
@@ -187,6 +188,7 @@ Ship.prototype.update = function() {
 	}	
 	if (this.cursor.up)
 	{
+		this.ship.animations.play('engines')
 		this.ship.body.velocity.x += Math.cos(this.ship.rotation)*10
 		this.ship.body.velocity.y += Math.sin(this.ship.rotation)*10
 	}
@@ -207,9 +209,9 @@ Ship.prototype.update = function() {
 	}
 	
 	
-	this.shadow.x = this.ship.x;
-	this.shadow.y = this.ship.y;
-	this.shadow.rotation = this.ship.rotation;
+	// this.shadow.x = this.ship.x;
+	// this.shadow.y = this.ship.y;
+	// this.shadow.rotation = this.ship.rotation;
 	// this.turret.rotation = this.ship.rotation;
 
 	// this.turret.x = this.ship.x;
@@ -237,18 +239,17 @@ Ship.prototype.kill = function() {
 	this.alive = false;
 	this.ship.kill();
 	// this.turret.kill();
-	this.shadow.kill();
+	// this.shadow.kill();
 }
 
 var game = new Phaser.Game(viewportWidth, viewportHeight, Phaser.AUTO, 'phaser-example', { preload: preload, create: eurecaClientSetup, update: update, render: render });
 
 function preload () {
 
-	game.load.atlas('ship', 'assets/ships.png', 'assets/ships.json');
-	game.load.atlas('enemy', 'assets/enemy-ships.png', 'assets/ships.json');
+	game.load.spritesheet('ship', 'assets/ships2.png', 120, 90);
 	game.load.image('logo', 'assets/logo.png');
 	game.load.image('bullet', 'assets/bullet.png');
-	game.load.image('earth', 'assets/scorched_earth.png');
+	game.load.image('space', 'assets/space.jpg');
 	game.load.spritesheet('kaboom', 'assets/explosion.png', 64, 64, 23);
 	game.load.image('restart','assets/restart.png'); 
 }
@@ -261,7 +262,7 @@ function create () {
 	game.stage.disableVisibilityChange  = true;
 	
 	//  Our tiled scrolling background
-	land = game.add.tileSprite(0, 0, viewportWidth, viewportHeight, 'earth');
+	land = game.add.tileSprite(0, 0, viewportWidth, viewportHeight, 'space');
 	land.fixedToCamera = true;
 	
 	shipsList = {};
@@ -272,7 +273,7 @@ function create () {
 	ship.x= game.world.randomX 
 	ship.y= game.world.randomY
 	bullets = player.bullets;
-	shadow = player.shadow;
+	// shadow = player.shadow;
 
 	//  Explosion pool
 	explosions = game.add.group();
@@ -314,7 +315,7 @@ function respawn () {
 	// game.stage.disableVisibilityChange  = true;
 	
 	//  Our tiled scrolling background
-	land = game.add.tileSprite(0, 0, viewportWidth, viewportHeight, 'earth');
+	land = game.add.tileSprite(0, 0, viewportWidth, viewportHeight, 'space');
 	land.fixedToCamera = true;
 	
 	shipsList = {};
