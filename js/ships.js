@@ -244,7 +244,7 @@ Ship.prototype.fire = function(target) {
 			this.nextFire = this.game.time.now + this.fireRate;
 			var bullet = this.bullets.getFirstDead();
 			// Using sin and cos to add offset in direction tank is facing
-			bullet.reset(this.ship.x + Math.cos(this.ship.rotation)*50, this.ship.y + Math.sin(this.ship.rotation)*50);
+			bullet.reset(this.ship.x + Math.cos(this.ship.rotation)*30, this.ship.y + Math.sin(this.ship.rotation)*30);
 
 
 			bullet.rotation = this.ship.rotation;
@@ -266,6 +266,7 @@ var game = new Phaser.Game(viewportWidth, viewportHeight, Phaser.AUTO, 'phaser-e
 function preload () {
 
 	game.load.spritesheet('ship', 'assets/ships1.png', 60, 45);
+	game.load.spritesheet('ship2', 'assets/ships2.png', 64, 64);
 	game.load.image('logo', 'assets/logo.png');
 	game.load.image('bullet', 'assets/bullet1.png');
 	game.load.image('space', 'assets/space.jpg');
