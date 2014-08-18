@@ -15,7 +15,8 @@ var viewportWidth = window.innerWidth * window.devicePixelRatio;
 var viewportHeight = window.innerHeight * window.devicePixelRatio;
 var fireRate = 400;
 var nextFire = 0;
-var newLogin = false
+var canFlip = true;
+var newLogin = false;
 
 var ready = false;
 var eurecaServer;
@@ -86,6 +87,7 @@ Ship = function (index, game, player, x, y) {
 		left:false,
 		right:false,
 		up:false,
+		down:false,
 		fire:false		
 	}
 
@@ -93,6 +95,7 @@ Ship = function (index, game, player, x, y) {
 		left:false,
 		right:false,
 		up:false,
+		down:false,
 		fire:false
 	}
 
@@ -134,7 +137,7 @@ Ship = function (index, game, player, x, y) {
 	game.physics.enable(this.ship, Phaser.Physics.ARCADE);
 	this.ship.body.immovable = false;
 	this.ship.body.drag.setTo(40);
-	this.ship.body.maxVelocity.setTo(240);
+	this.ship.body.maxVelocity.setTo(280);
 	// this.ship.body.collideWorldBounds = true;
 	this.ship.body.bounce.setTo(0, 0);
 
@@ -153,6 +156,7 @@ Ship.prototype.update = function() {
 		this.cursor.left != this.input.left ||
 		this.cursor.right != this.input.right ||
 		this.cursor.up != this.input.up ||
+		this.cursor.down != this.input.down ||
 		this.cursor.fire != this.input.fire
 	);
 	
@@ -195,6 +199,15 @@ Ship.prototype.update = function() {
 		this.ship.animations.play('engines')
 		this.ship.body.velocity.x += Math.cos(this.ship.rotation)*10
 		this.ship.body.velocity.y += Math.sin(this.ship.rotation)*10
+	}
+
+	if (this.cursor.down)
+	{
+		if(canFlip){
+			this.ship.angle += 180
+			canFlip = false
+		}
+		setTimeout(function() {canFlip = true}, 300)
 	}
 
 	if (this.cursor.fire)
@@ -379,6 +392,7 @@ function update () {
 	player.input.left = cursors.left.isDown;
 	player.input.right = cursors.right.isDown;
 	player.input.up = cursors.up.isDown;
+	player.input.down = cursors.down.isDown;
 	player.input.fire = fireButton.isDown;
 	player.input.tx = game.input.x+ game.camera.x;
 	player.input.ty = game.input.y+ game.camera.y;
