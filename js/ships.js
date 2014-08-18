@@ -137,7 +137,7 @@ Ship = function (index, game, player, x, y) {
 	game.physics.enable(this.ship, Phaser.Physics.ARCADE);
 	this.ship.body.immovable = false;
 	this.ship.body.drag.setTo(40);
-	this.ship.body.maxVelocity.setTo(280);
+	this.ship.body.maxVelocity.setTo(330);
 	// this.ship.body.collideWorldBounds = true;
 	this.ship.body.bounce.setTo(0, 0);
 
@@ -188,11 +188,11 @@ Ship.prototype.update = function() {
 
 	if (this.cursor.left)
 	{
-		this.ship.angle -= 4;
+		this.ship.angle -= 5;
 	}
 	else if (this.cursor.right)
 	{
-		this.ship.angle += 4;
+		this.ship.angle += 5;
 	}	
 	if (this.cursor.up)
 	{
@@ -249,6 +249,7 @@ Ship.prototype.fire = function(target) {
 
 			bullet.rotation = this.ship.rotation;
 			game.physics.arcade.velocityFromRotation(this.ship.rotation, 800, bullet.body.velocity);
+			setTimeout(function(){bullet.kill()},600)
 		}
 }
 
