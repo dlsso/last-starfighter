@@ -123,6 +123,7 @@ Ship = function (index, game, player, x, y) {
 	// this.shadow = game.add.sprite(x, y, 'enemy', 'shadow');
 	this.ship = game.add.sprite(x, y, 'ship');
 	this.ship.animations.add('engines', [1, 2], 20, true);
+	this.ship.animations.add('off', [0], 20, true);
 	// this.turret = game.add.sprite(x, y, 'enemy', 'turret');
 
 	// this.shadow.anchor.set(0.5);
@@ -132,9 +133,9 @@ Ship = function (index, game, player, x, y) {
 	this.ship.id = index;
 	game.physics.enable(this.ship, Phaser.Physics.ARCADE);
 	this.ship.body.immovable = false;
-	this.ship.body.drag.setTo(50);
-	this.ship.body.maxVelocity.setTo(220);
-	this.ship.body.collideWorldBounds = true;
+	this.ship.body.drag.setTo(40);
+	this.ship.body.maxVelocity.setTo(240);
+	// this.ship.body.collideWorldBounds = true;
 	this.ship.body.bounce.setTo(0, 0);
 
 	this.ship.angle = 0;
@@ -173,6 +174,9 @@ Ship.prototype.update = function() {
 			newLogin = false		
 		}
 	}
+	if(cursors.up.isUp){
+		this.ship.animations.play('off')
+	}
 
 
 	//cursor value is now updated by eurecaClient.exports.updateState method
@@ -198,8 +202,8 @@ Ship.prototype.update = function() {
 		this.fire({x:this.cursor.tx, y:this.cursor.ty});
 	}
 	// The *.4 creates a parallax scrolling effect
-	land.tilePosition.x = -game.camera.x*.2;
-	land.tilePosition.y = -game.camera.y*.2;	
+	land.tilePosition.x = -game.camera.x*.8;
+	land.tilePosition.y = -game.camera.y*.8;	
 
 	if(this.cursor.up) slideDirection = this.ship.rotation
 	
@@ -208,7 +212,8 @@ Ship.prototype.update = function() {
 		game.physics.arcade.velocityFromRotation(slideDirection, this.currentSpeed, this.ship.body.velocity);
 	}
 	
-	
+	game.world.wrap(this.ship)
+
 	// this.shadow.x = this.ship.x;
 	// this.shadow.y = this.ship.y;
 	// this.shadow.rotation = this.ship.rotation;
@@ -246,9 +251,9 @@ var game = new Phaser.Game(viewportWidth, viewportHeight, Phaser.AUTO, 'phaser-e
 
 function preload () {
 
-	game.load.spritesheet('ship', 'assets/ships2.png', 120, 90);
+	game.load.spritesheet('ship', 'assets/ships1.png', 72, 54);
 	game.load.image('logo', 'assets/logo.png');
-	game.load.image('bullet', 'assets/bullet.png');
+	game.load.image('bullet', 'assets/bullet1.png');
 	game.load.image('space', 'assets/space.jpg');
 	game.load.spritesheet('kaboom', 'assets/explosion.png', 64, 64, 23);
 	game.load.image('restart','assets/restart.png'); 
