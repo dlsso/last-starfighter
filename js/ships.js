@@ -265,7 +265,7 @@ var game = new Phaser.Game(viewportWidth, viewportHeight, Phaser.AUTO, 'phaser-e
 
 function preload () {
 
-	game.load.spritesheet('ship', 'assets/ships1.png', 72, 54);
+	game.load.spritesheet('ship', 'assets/ships1.png', 60, 45);
 	game.load.image('logo', 'assets/logo.png');
 	game.load.image('bullet', 'assets/bullet1.png');
 	game.load.image('space', 'assets/space.jpg');
@@ -277,7 +277,7 @@ function preload () {
 
 function create () {
 	//  Resize our game world to be a 2000 x 2000 square
-	game.world.setBounds(0, 0, 2000, 2000);
+	game.world.setBounds(0, 0, 1920, 1080);
 	game.stage.disableVisibilityChange  = true;
 	
 	//  Our tiled scrolling background
@@ -306,7 +306,7 @@ function create () {
 	ship.bringToTop();
 	// turret.bringToTop();
 		
-	logo = game.add.sprite(0, 200, 'logo');
+	logo = game.add.sprite(viewportWidth/2 - 200, viewportHeight/3 - 85, 'logo');
 	logo.fixedToCamera = true;
 	game.input.onDown.add(removeLogo, this);
 
@@ -316,7 +316,7 @@ function create () {
 	cursors = game.input.keyboard.createCursorKeys();
 	fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 	
-	setTimeout(removeLogo, 1000);
+	setTimeout(removeLogo, 2000);
 
 	var keys = {
 		x: ship.x,
