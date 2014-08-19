@@ -35,9 +35,10 @@ var eurecaClientSetup = function() {
 	{
 		//create() is moved here to make sure nothing is created before uniq id assignation
 		myId = id;
-		create();
-		eurecaServer.handshake();
-		ready = true;
+		// create();
+		// eurecaServer.handshake();
+		// ready = true;
+		menu();
 	}	
 	
 	eurecaClient.exports.kill = function(id)
@@ -140,8 +141,9 @@ Ship = function (index, game, player, x, y) {
 	this.ship.body.maxVelocity.setTo(330);
 	// this.ship.body.collideWorldBounds = true;
 	this.ship.body.bounce.setTo(0, 0);
-
-	this.ship.angle = 0;
+	// setSize does not work with rotation
+	// this.ship.body.setSize(40, 15, 20, 15);
+	this.ship.angle = -90;
 
 	game.physics.arcade.velocityFromRotation(this.ship.rotation, 0, this.ship.body.velocity);
 
@@ -178,9 +180,6 @@ Ship.prototype.update = function() {
 			newLogin = false		
 		}
 	}
-	if(cursors.up.isUp){
-		this.ship.animations.play('off')
-	}
 
 
 	//cursor value is now updated by eurecaClient.exports.updateState method
@@ -200,6 +199,9 @@ Ship.prototype.update = function() {
 		this.ship.body.velocity.x += Math.cos(this.ship.rotation)*10
 		this.ship.body.velocity.y += Math.sin(this.ship.rotation)*10
 	}
+	if(!this.cursor.up){
+		this.ship.animations.play('off')
+	}
 
 	if (this.cursor.down)
 	{
@@ -214,7 +216,7 @@ Ship.prototype.update = function() {
 	{	
 		this.fire({x:this.cursor.tx, y:this.cursor.ty});
 	}
-	// The *.4 creates a parallax scrolling effect
+	// The *.8 creates a parallax scrolling effect
 	land.tilePosition.x = -game.camera.x*.8;
 	land.tilePosition.y = -game.camera.y*.8;	
 
@@ -274,7 +276,22 @@ function preload () {
 	game.load.image('restart','assets/restart.png'); 
 }
 
+function menu () {
+	var background = game.add.tileSprite(0, 0, viewportWidth, viewportHeight, 'space');
+	background.autoScroll(-10,5)
+	var logo = game.add.sprite(viewportWidth/2 - 200, 10, 'logo');
+	var choose = "Choose your vessel:";
+	var style = { font: "32px Serif", fill: "#ddd"};
+	var t1 = game.add.text(viewportWidth/4 - 150, 300, choose, style);
 
+	var chooseShip1 = game.add.button(viewportWidth/4 - 150, 400, 'ship', create, this);
+	var chooseShip2 = game.add.button(viewportWidth/4 - 50, 390, 'ship2', create, this);
+
+	var instructions = "Arrow keys to move, spacebar to fire, down for special ability";
+	var style2 = { font: "20px Arial", fill: "#ddd", align: "center"};
+	var t2 = game.add.text(viewportWidth/2 - 270, viewportHeight - 50, instructions, style2);
+
+}
 
 function create () {
 	//  Resize our game world to be a 2000 x 2000 square
@@ -327,6 +344,8 @@ function create () {
 		alive: ship.alive
 	}
 	eurecaServer.handleKeys(keys);
+	eurecaServer.handshake();
+	ready = true;
 }
 
 function respawn () {
