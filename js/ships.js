@@ -62,7 +62,7 @@ var eurecaClientSetup = function() {
 			console.log("Trying to create a ship that already exists.")
 		}
 		else {
-			var shp = new Ship(i, game, ship, x, y);
+			var shp = new Ship1(i, game, ship, x, y);
 			shipsList[i] = shp;
 			newLogin = true
 		}
@@ -84,6 +84,9 @@ var eurecaClientSetup = function() {
 
 
 Ship = function (index, game, player, x, y) {
+
+	console.log("arguments:", arguments)
+	// if(arguments.length === 0){return this}
 	this.cursor = {
 		left:false,
 		right:false,
@@ -107,7 +110,7 @@ Ship = function (index, game, player, x, y) {
 
 
 	this.game = game;
-	this.health = 30;
+	this.health;
 	this.player = player;
 	this.bullets = game.add.group();
 	this.bullets.enableBody = true;
@@ -120,7 +123,7 @@ Ship = function (index, game, player, x, y) {
 	
 	
 	this.currentSpeed =0;
-	this.fireRate = 200;
+	this.fireRate;
 	this.nextFire = 0;
 	this.alive = true;
 
@@ -263,6 +266,26 @@ Ship.prototype.kill = function() {
 	// this.shadow.kill();
 }
 
+
+function Ship1(myId, game, ship) {
+	Ship.call(this, myId, game, ship)
+	this.health = 50;
+	this.fireRate = 200;	
+}
+Ship1.prototype = Object.create(Ship.prototype);
+Ship1.prototype.constructor = Ship1;
+
+// This doesn't work
+// function Ship1(myId, game, ship) {
+// 	console.log("arguments:", arguments)
+// 	Ship.call(this, myId, game, ship); 
+// 	this.health = 70;
+// }
+// Ship1.prototype = new Ship();
+// Ship1.prototype.constructor = Ship1;
+
+
+
 var game = new Phaser.Game(viewportWidth, viewportHeight, Phaser.AUTO, 'phaser-example', { preload: preload, create: eurecaClientSetup, update: update, render: render });
 
 function preload () {
@@ -284,8 +307,9 @@ function menu () {
 	var style = { font: "32px Serif", fill: "#ddd"};
 	var t1 = game.add.text(viewportWidth/4 - 150, 300, choose, style);
 
-	var chooseShip1 = game.add.button(viewportWidth/4 - 150, 400, 'ship', create, this);
-	var chooseShip2 = game.add.button(viewportWidth/4 - 50, 390, 'ship2', create, this);
+	var chooseShip1 = game.add.button(viewportWidth/4 - 150, 400, 'ship', createShip1, this);
+	var chooseShip2 = game.add.button(viewportWidth/4 - 50, 390, 'ship2', createShip2, this);
+	console.log("this:", this)
 
 	var instructions = "Arrow keys to move, spacebar to fire, down for special ability";
 	var style2 = { font: "20px Arial", fill: "#ddd", align: "center"};
@@ -293,7 +317,20 @@ function menu () {
 
 }
 
-function create () {
+function createShip1 () {
+	var shipType = Ship1
+	create.call(this, shipType)
+}
+function createShip2 () {
+	var shipType = Ship2
+	create.call(this, shipType)
+}
+function createShip3 () {
+	var shipType = Ship3
+	create.call(this, shipType)
+}
+
+function create (shipType) {
 	//  Resize our game world to be a 2000 x 2000 square
 	game.world.setBounds(0, 0, 1920, 1080);
 	game.stage.disableVisibilityChange  = true;
@@ -303,7 +340,7 @@ function create () {
 	land.fixedToCamera = true;
 	
 	shipsList = {};
-	player = new Ship(myId, game, ship);
+	player = new shipType(myId, game, ship);
 	shipsList[myId] = player;
 	ship = player.ship;
 	// turret = player.turret;
