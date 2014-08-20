@@ -44,6 +44,22 @@ var eurecaClientSetup = function() {
 		if (shipsList[id]) {
 			shipsList[id].kill();
 			delete shipsList[id];
+			if(id === ship.id){
+				var style = { font: "48px Arial", fill: "#f00"};
+				var l = game.add.text(viewportWidth/2-120, viewportHeight/2-100, "You lose.", style);
+				l.fixedToCamera = true;
+			}
+
+			// setTimeout lets the other kill get registered if the last two ships collide
+			setTimeout(function(){
+				if(Object.keys(shipsList).length === 1){
+					if(shipsList[ship.id].alive){
+						var style = { font: "48px Arial", fill: "#0f0"};
+						w = game.add.text(viewportWidth/2-120, viewportHeight/2-100, "You win!", style);
+						w.fixedToCamera = true;
+					}
+				}
+			}, 1)
 			// Adds restart button on death, not used in this version
 			// if(id === ship.id){
 			// 	restartButton = game.add.button(200, 200, 'restart', restart, this);
@@ -268,7 +284,7 @@ Ship1.prototype.fire = function(target) {
 
 function Ship2(myId, game, ship, x, y) {
 	Ship.call(this, myId, game, ship)
-	this.health = 30;
+	this.health = 40;
 	this.fireRate = 10;
 	this.specialDelay = 2000;
 	this.shipType = 'ship2'
@@ -450,6 +466,12 @@ function create (shipType, shipString) {
 
 	cursors = game.input.keyboard.createCursorKeys();
 	fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+
+	var health = "Health: " + player.health;
+	var style = { font: "16px Arial", fill: "#ddd"};
+	ship.h = game.add.text(10, 20, health, style);
+	ship.h.fixedToCamera = true;
+
 	
 	setTimeout(removeLogo, 2000);
 	var keys = {
@@ -548,9 +570,21 @@ function bulletHitPlayer (ship, bullet) {
 	switch(bullet.key){
 		case "bullet1":
 			shipsList[ship.id].health -= 10
+			if(ship.h){ship.h.destroy()
+				var health = "Health: " + player.health;
+				var style = { font: "16px Arial", fill: "#ddd"};
+				ship.h = game.add.text(10, 20, health, style);
+				ship.h.fixedToCamera = true;
+			}
 			break;
 		case "bullet2":
 			shipsList[ship.id].health -= 2
+			if(ship.h){ship.h.destroy()
+				var health = "Health: " + player.health;
+				var style = { font: "16px Arial", fill: "#ddd"};
+				ship.h = game.add.text(10, 20, health, style);
+				ship.h.fixedToCamera = true;
+			}
 			break;
 	}
 
