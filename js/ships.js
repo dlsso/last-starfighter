@@ -128,14 +128,7 @@ Ship = function (index, game, player, x, y) {
 	this.health;
 	this.player = player;
 	this.shipType = ''
-	this.bullets = game.add.group();
-	this.bullets.enableBody = true;
-	this.bullets.physicsBodyType = Phaser.Physics.ARCADE;
-	this.bullets.createMultiple(20, 'bullet', 0, false);
-	this.bullets.setAll('anchor.x', 0.5);
-	this.bullets.setAll('anchor.y', 0.5);
-	this.bullets.setAll('outOfBoundsKill', true);
-	this.bullets.setAll('checkWorldBounds', true);	
+
 	
 	this.currentSpeed = 0;
 	this.fireRate;
@@ -147,23 +140,6 @@ Ship = function (index, game, player, x, y) {
 
 	
 };
-Ship.prototype.fire = function(target) {
-		if (!this.alive) return;
-		// This function takes bullets from the extinct bullet pool and 
-		if (this.game.time.now > this.nextFire && this.bullets.countDead() > 0)
-		{
-			this.nextFire = this.game.time.now + this.fireRate;
-			var bullet = this.bullets.getFirstDead();
-			bullet.bringToTop()
-			
-			// Using sin and cos to add offset in direction ship is facing
-			bullet.reset(this.ship.x + Math.cos(this.ship.rotation)*30, this.ship.y + Math.sin(this.ship.rotation)*30);
-
-			bullet.rotation = this.ship.rotation;
-			game.physics.arcade.velocityFromRotation(this.ship.rotation, 800, bullet.body.velocity);
-			setTimeout(function(){bullet.kill()},600)
-		}
-}
 Ship.prototype.kill = function() {
 	this.alive = false;
 	this.ship.kill();
@@ -172,7 +148,7 @@ Ship.prototype.kill = function() {
 
 function Ship1(myId, game, ship, x, y) {
 	Ship.call(this, myId, game, ship)
-	this.health = 50;
+	this.health = 30;
 	this.fireRate = 200;
 	this.shipType = 'ship1'
 	this.ship = game.add.sprite(x, y, 'ship');
@@ -185,9 +161,18 @@ function Ship1(myId, game, ship, x, y) {
 	this.ship.body.drag.setTo(40);
 	this.ship.body.maxVelocity.setTo(330);
 	this.ship.body.bounce.setTo(0, 0);
+	this.ship.angle = -90;
 	// setSize does not work with rotation
 	// this.ship.body.setSize(40, 15, 20, 15);
-	this.ship.angle = -90;
+	this.bullets = game.add.group();
+	this.bullets.enableBody = true;
+	this.bullets.physicsBodyType = Phaser.Physics.ARCADE;
+	this.bullets.createMultiple(20, 'bullet1', 0, false);
+	this.bullets.setAll('anchor.x', 0.5);
+	this.bullets.setAll('anchor.y', 0.5);
+	this.bullets.setAll('outOfBoundsKill', true);
+	this.bullets.setAll('checkWorldBounds', true);	
+	// Allow powerslide
 	game.physics.arcade.velocityFromRotation(this.ship.rotation, 0, this.ship.body.velocity);
 }
 Ship1.prototype = Object.create(Ship.prototype);
@@ -263,11 +248,28 @@ Ship1.prototype.update = function(shipType) {
 	
 	game.world.wrap(this.ship)
 };
+Ship1.prototype.fire = function(target) {
+		if (!this.alive) return;
+		// This function takes bullets from the extinct bullet pool and allows fire if delay is up
+		if (this.game.time.now > this.nextFire && this.bullets.countDead() > 0)
+		{
+			this.nextFire = this.game.time.now + this.fireRate;
+			var bullet = this.bullets.getFirstDead();
+			bullet.bringToTop()
+			
+			// Using sin and cos to add offset in direction ship is facing
+			bullet.reset(this.ship.x + Math.cos(this.ship.rotation)*30, this.ship.y + Math.sin(this.ship.rotation)*30);
+
+			bullet.rotation = this.ship.rotation;
+			game.physics.arcade.velocityFromRotation(this.ship.rotation, 800, bullet.body.velocity);
+			setTimeout(function(){bullet.kill()},600)
+		}
+}
 
 function Ship2(myId, game, ship, x, y) {
 	Ship.call(this, myId, game, ship)
-	this.health = 50;
-	this.fireRate = 200;
+	this.health = 30;
+	this.fireRate = 10;
 	this.specialDelay = 2000;
 	this.shipType = 'ship2'
 	this.ship = game.add.sprite(x, y, 'ship2');
@@ -279,9 +281,17 @@ function Ship2(myId, game, ship, x, y) {
 	this.ship.body.immovable = false;
 	this.ship.body.drag.setTo(5000);
 	this.ship.body.bounce.setTo(0, 0);
+	this.ship.angle = -90;
 	// setSize does not work with rotation
 	// this.ship.body.setSize(40, 15, 20, 15);
-	this.ship.angle = -90;
+	this.bullets = game.add.group();
+	this.bullets.enableBody = true;
+	this.bullets.physicsBodyType = Phaser.Physics.ARCADE;
+	this.bullets.createMultiple(20, 'bullet2', 0, false);
+	this.bullets.setAll('anchor.x', 0.5);
+	this.bullets.setAll('anchor.y', 0.5);
+	this.bullets.setAll('outOfBoundsKill', true);
+	this.bullets.setAll('checkWorldBounds', true);
 	game.physics.arcade.velocityFromRotation(this.ship.rotation, 0, this.ship.body.velocity);
 }
 Ship2.prototype = Object.create(Ship.prototype);
@@ -355,6 +365,23 @@ Ship2.prototype.update = function(shipType) {
 	// Prevent this ship from hitting world boundaries
 	game.world.wrap(this.ship)
 };
+Ship2.prototype.fire = function(target) {
+		if (!this.alive) return;
+		// This function takes bullets from the extinct bullet pool and 
+		if (this.game.time.now > this.nextFire && this.bullets.countDead() > 0)
+		{
+			this.nextFire = this.game.time.now + this.fireRate;
+			var bullet = this.bullets.getFirstDead();
+			bullet.bringToTop()
+			
+			// Using sin and cos to add offset in direction ship is facing
+			bullet.reset(this.ship.x + Math.cos(this.ship.rotation)*30, this.ship.y + Math.sin(this.ship.rotation)*30);
+
+			bullet.rotation = this.ship.rotation;
+			game.physics.arcade.velocityFromRotation(this.ship.rotation, 1000, bullet.body.velocity);
+			setTimeout(function(){bullet.kill()},200)
+		}
+}
 
 
 var game = new Phaser.Game(viewportWidth, viewportHeight, Phaser.AUTO, 'phaser-example', { preload: preload, create: eurecaClientSetup, update: update, render: render });
@@ -364,7 +391,8 @@ function preload () {
 	game.load.spritesheet('ship', 'assets/ships1.png', 60, 45);
 	game.load.spritesheet('ship2', 'assets/ships2.png', 64, 64);
 	game.load.image('logo', 'assets/logo.png');
-	game.load.image('bullet', 'assets/bullet1.png');
+	game.load.image('bullet1', 'assets/bullet1.png');
+	game.load.image('bullet2', 'assets/bullet2.png');
 	game.load.image('space', 'assets/space.jpg');
 	game.load.spritesheet('kaboom', 'assets/explosion.png', 64, 64, 23);
 	game.load.image('restart','assets/restart.png'); 
@@ -516,7 +544,16 @@ function update () {
 
 function bulletHitPlayer (ship, bullet) {
 	bullet.kill();
-	shipsList[ship.id].health -= 10
+
+	switch(bullet.key){
+		case "bullet1":
+			shipsList[ship.id].health -= 10
+			break;
+		case "bullet2":
+			shipsList[ship.id].health -= 2
+			break;
+	}
+
 	if (shipsList[ship.id].health<=0)
 	{
 		var explosionAnimation = explosions.getFirstExists(false);
