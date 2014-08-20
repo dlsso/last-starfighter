@@ -87,6 +87,9 @@ var eurecaClientSetup = function() {
 				case "ship2":
 					shp = new Ship2(i, game, ship, x, y);
 					break;
+				case "ship3":
+					shp = new Ship3(i, game, ship, x, y);
+					break;
 			}
 			shipsList[i] = shp;
 			newLogin = true
@@ -106,17 +109,18 @@ var eurecaClientSetup = function() {
 			shipsList[id].update(state.shipType);
 		}
 		else {
-			var shp;
-			switch(state.shipType){
-				case "ship1":
-					shp = new Ship1(id, game, ship, state.x, state.y);
-					break;
-				case "ship2":
-					shp = new Ship2(id, game, ship, state.x, state.y);
-					break;
-			}
-			shipsList[id] = shp;
-			newLogin = true
+			// This code not needed
+			// var shp;
+			// switch(state.shipType){
+			// 	case "ship1":
+			// 		shp = new Ship1(id, game, ship, state.x, state.y);
+			// 		break;
+			// 	case "ship2":
+			// 		shp = new Ship2(id, game, ship, state.x, state.y);
+			// 		break;
+			// }
+			// shipsList[id] = shp;
+			// newLogin = true
 		}
 	}
 }
@@ -400,15 +404,137 @@ Ship2.prototype.fire = function(target) {
 }
 
 
+function Ship3(myId, game, ship, x, y) {
+	Ship.call(this, myId, game, ship)
+	this.health = 100;
+	this.fireRate = 300;
+	this.specialDelay = 2000;
+	this.shipType = 'ship3'
+	this.ship = game.add.sprite(x, y, 'ship3');
+	this.ship.animations.add('engines', [1, 2], 20, true);
+	this.ship.animations.add('off', [0], 20, true);
+	this.ship.anchor.set(0.5);
+	this.ship.id = myId;
+	game.physics.enable(this.ship, Phaser.Physics.ARCADE);
+	this.ship.body.immovable = false;
+	this.ship.body.drag.setTo(50);
+	this.ship.body.maxVelocity.setTo(220);
+	this.ship.body.bounce.setTo(0, 0);
+	this.ship.angle = -90;
+	// setSize does not work with rotation
+	// this.ship.body.setSize(40, 15, 20, 15);
+	this.bullets = game.add.group();
+	this.bullets.enableBody = true;
+	this.bullets.physicsBodyType = Phaser.Physics.ARCADE;
+	this.bullets.createMultiple(20, 'bullet3', 0, false);
+	this.bullets.setAll('anchor.x', 0.5);
+	this.bullets.setAll('anchor.y', 0.5);
+	this.bullets.setAll('outOfBoundsKill', true);
+	this.bullets.setAll('checkWorldBounds', true);
+	game.physics.arcade.velocityFromRotation(this.ship.rotation, 0, this.ship.body.velocity);
+}
+Ship3.prototype = Object.create(Ship.prototype);
+Ship3.prototype.constructor = Ship3;
+Ship3.prototype.update = function(shipType) {
+	var inputChanged = (
+		this.cursor.left != this.input.left ||
+		this.cursor.right != this.input.right ||
+		this.cursor.up != this.input.up ||
+		this.cursor.down != this.input.down ||
+		this.cursor.fire != this.input.fire
+	);
+	if (inputChanged || newLogin === true)
+	{
+		//Handle input change here
+		//send new values to the server		
+		if (this.ship.id == myId)
+		{
+			// send latest valid state to the server
+			this.input.x = this.ship.x;
+			this.input.y = this.ship.y;
+			this.input.angle = this.ship.angle;
+			this.input.alive = this.ship.alive;
+			this.input.shipType = this.shipType;
+			eurecaServer.handleKeys(this.input);
+			newLogin = false		
+		}
+	}
+
+	if (this.cursor.left)
+	{
+		this.ship.angle -= 2;
+	}
+
+	else if (this.cursor.right)
+	{
+		this.ship.angle += 2;
+	}
+
+	if (this.cursor.up)
+	{
+		this.ship.animations.play('engines')
+		this.ship.body.velocity.x += Math.cos(this.ship.rotation)*3
+		this.ship.body.velocity.y += Math.sin(this.ship.rotation)*3
+	}
+	if(!this.cursor.up){
+		this.ship.animations.play('off')
+	}
+
+	if (this.cursor.down)
+	{
+		if(this.game.time.now > this.nextSpecial){
+			// this.ship.angle += 180
+			// this.nextSpecial = this.game.time.now + this.specialDelay
+		}
+	}
+
+	if (this.cursor.fire)
+	{	
+		this.fire({x:this.cursor.tx, y:this.cursor.ty});
+	}
+	// The *.8 creates a parallax scrolling effect
+	land.tilePosition.x = -game.camera.x*.8;
+	land.tilePosition.y = -game.camera.y*.8;	
+
+	if(this.cursor.up) slideDirection = this.ship.rotation
+	
+	if (this.currentSpeed > 0)
+	{
+		game.physics.arcade.velocityFromRotation(slideDirection, this.currentSpeed, this.ship.body.velocity);
+	}
+	// Prevent this ship from hitting world boundaries
+	game.world.wrap(this.ship)
+};
+Ship3.prototype.fire = function(target) {
+		if (!this.alive) return;
+		// This function takes bullets from the extinct bullet pool and 
+		if (this.game.time.now > this.nextFire && this.bullets.countDead() > 0)
+		{
+			this.nextFire = this.game.time.now + this.fireRate;
+			var bullet = this.bullets.getFirstDead();
+			bullet.bringToTop()
+			
+			// Using sin and cos to add offset in direction ship is facing
+			bullet.reset(this.ship.x + Math.cos(this.ship.rotation)*30, this.ship.y + Math.sin(this.ship.rotation)*30);
+
+			bullet.rotation = this.ship.rotation;
+			game.physics.arcade.velocityFromRotation(this.ship.rotation, 1000, bullet.body.velocity);
+			setTimeout(function(){bullet.kill()},800)
+		}
+}
+
+
 var game = new Phaser.Game(viewportWidth, viewportHeight, Phaser.AUTO, 'phaser-example', { preload: preload, create: eurecaClientSetup, update: update, render: render });
 
 function preload () {
 
 	game.load.spritesheet('ship', 'assets/ships1.png', 60, 45);
 	game.load.spritesheet('ship2', 'assets/ships2.png', 64, 64);
+	game.load.spritesheet('ship3', 'assets/ships3b.png', 134, 110);
 	game.load.image('logo', 'assets/logo.png');
 	game.load.image('bullet1', 'assets/bullet1.png');
 	game.load.image('bullet2', 'assets/bullet2.png');
+	game.load.image('bullet3', 'assets/bullet3.png');
 	game.load.image('space', 'assets/space.jpg');
 	game.load.spritesheet('kaboom', 'assets/explosion.png', 64, 64, 23);
 	game.load.image('restart','assets/restart.png'); 
@@ -424,6 +550,7 @@ function menu () {
 
 	var chooseShip1 = game.add.button(viewportWidth/4 - 150, 400, 'ship', create.bind(this, Ship1, 'ship1'));
 	var chooseShip2 = game.add.button(viewportWidth/4 - 50, 390, 'ship2', create.bind(this, Ship2, 'ship2'));
+	var chooseShip3 = game.add.button(viewportWidth/4 + 50, 370, 'ship3', create.bind(this, Ship3, 'ship3'));
 
 	var instructions = "Arrow keys to move, spacebar to fire, down for special ability";
 	var style2 = { font: "20px Arial", fill: "#ddd", align: "center"};
@@ -579,6 +706,15 @@ function bulletHitPlayer (ship, bullet) {
 			break;
 		case "bullet2":
 			shipsList[ship.id].health -= 2
+			if(ship.h){ship.h.destroy()
+				var health = "Health: " + player.health;
+				var style = { font: "16px Arial", fill: "#ddd"};
+				ship.h = game.add.text(10, 20, health, style);
+				ship.h.fixedToCamera = true;
+			}
+			break;
+		case "bullet3":
+			shipsList[ship.id].health -= 20
 			if(ship.h){ship.h.destroy()
 				var health = "Health: " + player.health;
 				var style = { font: "16px Arial", fill: "#ddd"};
