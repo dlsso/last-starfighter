@@ -1,7 +1,9 @@
+//=============================================================================
+//	I did not set up this system so I take no credit or blame for the
+//	connection handling or variable creation/naming respectively
+//=============================================================================
 var land;
-// var shadow;
 var ship;
-// var turret;
 var player;
 var shipsList = {};
 var explosions;
@@ -15,11 +17,11 @@ var viewportWidth = window.innerWidth * window.devicePixelRatio;
 var viewportHeight = window.innerHeight * window.devicePixelRatio;
 var fireRate = 400;
 var nextFire = 0;
-var canFlip = true;
 var newLogin = false;
 var ready = false;
 var eurecaServer;
-//this function will handle client communication with the server
+
+//	This function will handle client communication with the server
 var eurecaClientSetup = function() {
 	//create an instance of eureca.io client
 	var eurecaClient = new Eureca.Client();
@@ -27,16 +29,13 @@ var eurecaClientSetup = function() {
 	eurecaClient.ready(function (proxy) {		
 		eurecaServer = proxy;
 	});
-	
-	//methods defined under "exports" namespace become available in the server side
-	
+	//=============================================================================
+	//	Methods defined under "exports" namespace become available server side
+	//=============================================================================
 	eurecaClient.exports.setId = function(id) 
 	{
-		//create() is moved here to make sure nothing is created before uniq id assignation
+		// This is called on connect, assigns id and takes player to menu
 		myId = id;
-		// create();
-		// eurecaServer.handshake();
-		// ready = true;
 		menu();
 	}	
 	
@@ -45,17 +44,16 @@ var eurecaClientSetup = function() {
 		if (shipsList[id]) {
 			shipsList[id].kill();
 			delete shipsList[id];
-			if(id === ship.id){
-				restartButton = game.add.button(200, 200, 'restart', restart, this);
-				restartButton.fixedToCamera = true
-			}
-			// console.log('killing ', id, shipsList[id]);
+			// Adds restart button on death, not used in this version
+			// if(id === ship.id){
+			// 	restartButton = game.add.button(200, 200, 'restart', restart, this);
+			// 	restartButton.fixedToCamera = true
+			// }
 		}
 	}	
 	
 	eurecaClient.exports.spawnEnemy = function(i, x, y, shipType)
 	{
-		console.log("shipType:", shipType)
 		if (i == myId) return; //this is me
 		console.log('SPAWN');
 
@@ -64,6 +62,8 @@ var eurecaClientSetup = function() {
 		}
 		else {
 			var shp;
+			// shipType is a string passed to this function to identify
+			// what type of ship needs to be created
 			switch(shipType){
 				case "ship1":
 					shp = new Ship1(i, game, ship, x, y);
@@ -72,8 +72,6 @@ var eurecaClientSetup = function() {
 					shp = new Ship2(i, game, ship, x, y);
 					break;
 			}
-
-			// var shp = new shipType(i, game, ship, x, y);
 			shipsList[i] = shp;
 			newLogin = true
 		}
@@ -83,20 +81,15 @@ var eurecaClientSetup = function() {
 	{
 		if (shipsList[id])  {
 			shipsList[id].ship.bringToTop();
-			// shipsList[id].bullets.children[0].bringToTop();
-
 			shipsList[id].cursor = state;
 			shipsList[id].ship.x = state.x;
 			shipsList[id].ship.y = state.y;
 			shipsList[id].ship.angle = state.angle;
-			// shipsList[id].turret.rotation = state.rot;
 			shipsList[id].alive = state.alive;
 			shipsList[id].shipType = state.shipType;
-			console.log("state.shipType:", state.shipType)
 			shipsList[id].update(state.shipType);
 		}
 		else {
-			console.log("spawning enemy, game", game)
 			var shp;
 			switch(state.shipType){
 				case "ship1":
@@ -106,8 +99,6 @@ var eurecaClientSetup = function() {
 					shp = new Ship2(id, game, ship, state.x, state.y);
 					break;
 			}
-
-			// var shp = new shipType(i, game, ship, x, y);
 			shipsList[id] = shp;
 			newLogin = true
 		}
@@ -133,12 +124,6 @@ Ship = function (index, game, player, x, y) {
 		fire:false
 	}
 
-	// var x = Math.floor(Math.random() * 2000) + 1
-	// var x = 100
-	// var y = 100
-	// var y = Math.floor(Math.random() * 2000) + 1
-
-
 	this.game = game;
 	this.health;
 	this.player = player;
@@ -152,20 +137,62 @@ Ship = function (index, game, player, x, y) {
 	this.bullets.setAll('outOfBoundsKill', true);
 	this.bullets.setAll('checkWorldBounds', true);	
 	
-	
 	this.currentSpeed = 0;
 	this.fireRate;
 	this.nextFire = 0;
+	// Set default delay on special ability to 100ms
+	this.specialDelay = 100;
+	this.nextSpecial = 0;
 	this.alive = true;
 
 	
 };
+Ship.prototype.fire = function(target) {
+		if (!this.alive) return;
+		// This function takes bullets from the extinct bullet pool and 
+		if (this.game.time.now > this.nextFire && this.bullets.countDead() > 0)
+		{
+			this.nextFire = this.game.time.now + this.fireRate;
+			var bullet = this.bullets.getFirstDead();
+			bullet.bringToTop()
+			
+			// Using sin and cos to add offset in direction ship is facing
+			bullet.reset(this.ship.x + Math.cos(this.ship.rotation)*30, this.ship.y + Math.sin(this.ship.rotation)*30);
 
-Ship.prototype.update = function(shipType) {
+			bullet.rotation = this.ship.rotation;
+			game.physics.arcade.velocityFromRotation(this.ship.rotation, 800, bullet.body.velocity);
+			setTimeout(function(){bullet.kill()},600)
+		}
+}
+Ship.prototype.kill = function() {
+	this.alive = false;
+	this.ship.kill();
+}
 
-	// eurecaServer.playerJustLoggedIn()
-	// player.input.shipType = shipType
 
+function Ship1(myId, game, ship, x, y) {
+	Ship.call(this, myId, game, ship)
+	this.health = 50;
+	this.fireRate = 200;
+	this.shipType = 'ship1'
+	this.ship = game.add.sprite(x, y, 'ship');
+	this.ship.animations.add('engines', [1, 2], 20, true);
+	this.ship.animations.add('off', [0], 20, true);
+	this.ship.anchor.set(0.5);
+	this.ship.id = myId;
+	game.physics.enable(this.ship, Phaser.Physics.ARCADE);
+	this.ship.body.immovable = false;
+	this.ship.body.drag.setTo(40);
+	this.ship.body.maxVelocity.setTo(330);
+	this.ship.body.bounce.setTo(0, 0);
+	// setSize does not work with rotation
+	// this.ship.body.setSize(40, 15, 20, 15);
+	this.ship.angle = -90;
+	game.physics.arcade.velocityFromRotation(this.ship.rotation, 0, this.ship.body.velocity);
+}
+Ship1.prototype = Object.create(Ship.prototype);
+Ship1.prototype.constructor = Ship1;
+Ship1.prototype.update = function(shipType) {
 
 	var inputChanged = (
 		this.cursor.left != this.input.left ||
@@ -174,7 +201,6 @@ Ship.prototype.update = function(shipType) {
 		this.cursor.down != this.input.down ||
 		this.cursor.fire != this.input.fire
 	);
-	
 	
 	if (inputChanged || newLogin === true)
 	{
@@ -186,19 +212,13 @@ Ship.prototype.update = function(shipType) {
 			this.input.x = this.ship.x;
 			this.input.y = this.ship.y;
 			this.input.angle = this.ship.angle;
-			// this.input.rot = this.turret.rotation;
 			this.input.alive = this.ship.alive;
-			console.log("shipType123:", shipType)
 			this.input.shipType = this.shipType;
 
 			eurecaServer.handleKeys(this.input);
 			newLogin = false		
 		}
 	}
-
-
-	//cursor value is now updated by eurecaClient.exports.updateState method
-	
 
 	if (this.cursor.left)
 	{
@@ -220,11 +240,10 @@ Ship.prototype.update = function(shipType) {
 
 	if (this.cursor.down)
 	{
-		if(canFlip){
+		if(this.game.time.now > this.nextSpecial){
 			this.ship.angle += 180
-			canFlip = false
+			this.nextSpecial = this.game.time.now + this.specialDelay
 		}
-		setTimeout(function() {canFlip = true}, 300)
 	}
 
 	if (this.cursor.fire)
@@ -243,107 +262,99 @@ Ship.prototype.update = function(shipType) {
 	}
 	
 	game.world.wrap(this.ship)
-
-	// this.shadow.x = this.ship.x;
-	// this.shadow.y = this.ship.y;
-	// this.shadow.rotation = this.ship.rotation;
-	// this.turret.rotation = this.ship.rotation;
-
-	// this.turret.x = this.ship.x;
-	// this.turret.y = this.ship.y;
 };
-
-
-Ship.prototype.fire = function(target) {
-		if (!this.alive) return;
-		if (this.game.time.now > this.nextFire && this.bullets.countDead() > 0)
-		{
-			this.nextFire = this.game.time.now + this.fireRate;
-			var bullet = this.bullets.getFirstDead();
-			// Using sin and cos to add offset in direction tank is facing
-			bullet.bringToTop()
-			
-			bullet.reset(this.ship.x + Math.cos(this.ship.rotation)*30, this.ship.y + Math.sin(this.ship.rotation)*30);
-
-			console.log("bullet:", bullet)
-			bullet.rotation = this.ship.rotation;
-			game.physics.arcade.velocityFromRotation(this.ship.rotation, 800, bullet.body.velocity);
-			setTimeout(function(){bullet.kill()},600)
-		}
-}
-
-
-Ship.prototype.kill = function() {
-	this.alive = false;
-	this.ship.kill();
-	// this.turret.kill();
-	// this.shadow.kill();
-}
-
-
-function Ship1(myId, game, ship, x, y) {
-	Ship.call(this, myId, game, ship)
-	this.health = 50;
-	this.fireRate = 200;
-	this.shipType = 'ship1'
-	// this.shadow = game.add.sprite(x, y, 'enemy', 'shadow');
-	this.ship = game.add.sprite(x, y, 'ship');
-	this.ship.animations.add('engines', [1, 2], 20, true);
-	this.ship.animations.add('off', [0], 20, true);
-	// this.turret = game.add.sprite(x, y, 'enemy', 'turret');
-
-	// this.shadow.anchor.set(0.5);
-	this.ship.anchor.set(0.5);
-	// this.turret.anchor.set(0.3, 0.5);
-
-	this.ship.id = myId;
-	game.physics.enable(this.ship, Phaser.Physics.ARCADE);
-	this.ship.body.immovable = false;
-	this.ship.body.drag.setTo(40);
-	this.ship.body.maxVelocity.setTo(330);
-	// this.ship.body.collideWorldBounds = true;
-	this.ship.body.bounce.setTo(0, 0);
-	// setSize does not work with rotation
-	// this.ship.body.setSize(40, 15, 20, 15);
-	this.ship.angle = -90;
-
-	game.physics.arcade.velocityFromRotation(this.ship.rotation, 0, this.ship.body.velocity);
-
-}
-Ship1.prototype = Object.create(Ship.prototype);
-Ship1.prototype.constructor = Ship1;
-
 
 function Ship2(myId, game, ship, x, y) {
 	Ship.call(this, myId, game, ship)
 	this.health = 50;
 	this.fireRate = 200;
+	this.specialDelay = 2000;
 	this.shipType = 'ship2'
-	// this.shadow = game.add.sprite(x, y, 'enemy', 'shadow');
 	this.ship = game.add.sprite(x, y, 'ship2');
 	this.ship.animations.add('engines', [1, 2], 20, true);
 	this.ship.animations.add('off', [0], 20, true);
-	// this.turret = game.add.sprite(x, y, 'enemy', 'turret');
-
-	// this.shadow.anchor.set(0.5);
 	this.ship.anchor.set(0.5);
-	// this.turret.anchor.set(0.3, 0.5);
-
 	this.ship.id = myId;
 	game.physics.enable(this.ship, Phaser.Physics.ARCADE);
 	this.ship.body.immovable = false;
-	this.ship.body.drag.setTo(40);
-	this.ship.body.maxVelocity.setTo(330);
-	// this.ship.body.collideWorldBounds = true;
+	this.ship.body.drag.setTo(5000);
 	this.ship.body.bounce.setTo(0, 0);
 	// setSize does not work with rotation
 	// this.ship.body.setSize(40, 15, 20, 15);
 	this.ship.angle = -90;
-
 	game.physics.arcade.velocityFromRotation(this.ship.rotation, 0, this.ship.body.velocity);
 }
 Ship2.prototype = Object.create(Ship.prototype);
 Ship2.prototype.constructor = Ship2;
+Ship2.prototype.update = function(shipType) {
+	var inputChanged = (
+		this.cursor.left != this.input.left ||
+		this.cursor.right != this.input.right ||
+		this.cursor.up != this.input.up ||
+		this.cursor.down != this.input.down ||
+		this.cursor.fire != this.input.fire
+	);
+	if (inputChanged || newLogin === true)
+	{
+		//Handle input change here
+		//send new values to the server		
+		if (this.ship.id == myId)
+		{
+			// send latest valid state to the server
+			this.input.x = this.ship.x;
+			this.input.y = this.ship.y;
+			this.input.angle = this.ship.angle;
+			this.input.alive = this.ship.alive;
+			this.input.shipType = this.shipType;
+			eurecaServer.handleKeys(this.input);
+			newLogin = false		
+		}
+	}
+
+	if (this.cursor.left)
+	{
+		this.ship.angle -= 12;
+	}
+	else if (this.cursor.right)
+	{
+		this.ship.angle += 12;
+	}	
+	if (this.cursor.up)
+	{
+		this.ship.animations.play('engines')
+		this.ship.body.velocity.x = Math.cos(this.ship.rotation)*500
+		this.ship.body.velocity.y = Math.sin(this.ship.rotation)*500
+	}
+	if(!this.cursor.up){
+		this.ship.animations.play('off')
+	}
+
+	if (this.cursor.down)
+	{
+		if(this.game.time.now > this.nextSpecial){
+			this.ship.x += Math.floor(Math.random()*800) - 400
+			this.ship.y += Math.floor(Math.random()*800) - 400
+			this.nextSpecial = this.game.time.now + this.specialDelay
+		}
+	}
+
+
+	if (this.cursor.fire)
+	{	
+		this.fire({x:this.cursor.tx, y:this.cursor.ty});
+	}
+	// The *.8 creates a parallax scrolling effect
+	land.tilePosition.x = -game.camera.x*.8;
+	land.tilePosition.y = -game.camera.y*.8;	
+
+	if(this.cursor.up) slideDirection = this.ship.rotation
+	
+	if (this.currentSpeed > 0)
+	{
+	}
+	// Prevent this ship from hitting world boundaries
+	game.world.wrap(this.ship)
+};
 
 
 var game = new Phaser.Game(viewportWidth, viewportHeight, Phaser.AUTO, 'phaser-example', { preload: preload, create: eurecaClientSetup, update: update, render: render });
@@ -378,23 +389,20 @@ function menu () {
 
 
 function create (shipType, shipString) {
-	//  Resize our game world to be a 2000 x 2000 square
+	//  Resize our game world
 	game.world.setBounds(0, 0, 1920, 1080);
 	game.stage.disableVisibilityChange  = true;
-	
 	//  Our tiled scrolling background
 	land = game.add.tileSprite(0, 0, viewportWidth, viewportHeight, 'space');
 	land.fixedToCamera = true;
 	
-	// shipsList = {};
 	player = new shipType(myId, game, ship);
 	shipsList[myId] = player;
 	ship = player.ship;
-	// turret = player.turret;
 	ship.x= game.world.randomX 
 	ship.y= game.world.randomY
+	ship.bringToTop();
 	bullets = player.bullets;
-	// shadow = player.shadow;
 
 	//  Explosion pool
 	explosions = game.add.group();
@@ -404,9 +412,6 @@ function create (shipType, shipString) {
 		explosionAnimation.anchor.setTo(0.5, 0.5);
 		explosionAnimation.animations.add('kaboom');
 	}
-
-	ship.bringToTop();
-	// turret.bringToTop();
 		
 	logo = game.add.sprite(viewportWidth/2 - 200, viewportHeight/3 - 85, 'logo');
 	logo.fixedToCamera = true;
@@ -419,7 +424,6 @@ function create (shipType, shipString) {
 	fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 	
 	setTimeout(removeLogo, 2000);
-	console.log("player.shipType:", player.shipType)
 	var keys = {
 		x: ship.x,
 		y: ship.y,
@@ -433,59 +437,38 @@ function create (shipType, shipString) {
 	ready = true;
 }
 
-function respawn (shipType) {
-	//  Resize our game world to be a 2000 x 2000 square
-	// game.world.setBounds(0, 0, 1000, 1000);
-	// game.stage.disableVisibilityChange  = true;
-	
-	//  Our tiled scrolling background
-	land = game.add.tileSprite(0, 0, viewportWidth, viewportHeight, 'space');
-	land.fixedToCamera = true;
-	
-	shipsList = {};
-	player = new shipType(myId, game, ship);
-	shipsList[myId] = player;
-	ship = player.ship;
-	// turret = player.turret;
-	ship.x= game.world.randomX 
-	ship.y= game.world.randomY
-	// bullets = player.bullets;
-	// shadow = player.shadow;
-	//  Explosion pool
-	explosions = game.add.group();
+//	Not using this function in this version
+//=============================================================================
+// function respawn (shipType) {
+// 	land = game.add.tileSprite(0, 0, viewportWidth, viewportHeight, 'space');
+// 	land.fixedToCamera = true;
+// 	shipsList = {};
+// 	player = new shipType(myId, game, ship);
+// 	shipsList[myId] = player;
+// 	ship = player.ship;
+// 	ship.x= game.world.randomX 
+// 	ship.y= game.world.randomY
+// 	explosions = game.add.group();
 
-	for (var i = 0; i < 10; i++)
-	{
-		var explosionAnimation = explosions.create(0, 0, 'kaboom', [0], false);
-		explosionAnimation.anchor.setTo(0.5, 0.5);
-		explosionAnimation.animations.add('kaboom');
-	}
-
-	ship.bringToTop();
-	// turret.bringToTop();
-		
-	// logo = game.add.sprite(0, 200, 'logo');
-	// logo.fixedToCamera = true;
-	// game.input.onDown.add(removeLogo, this);
-	// setTimeout(removeLogo, 1000);
-
-	game.camera.follow(ship);
-	game.camera.focusOnXY(0, 0);
-
-	// cursors = game.input.keyboard.createCursorKeys();
-	// fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-	
-
-	var keys = {
-		x: ship.x,
-		y: ship.y,
-		angle: ship.angle,
-		rot: ship.rotation,
-		alive: ship.alive,
-		shipType: player.shipType
-	}
-	eurecaServer.handleKeys(keys);
-}
+// 	for (var i = 0; i < 10; i++)
+// 	{
+// 		var explosionAnimation = explosions.create(0, 0, 'kaboom', [0], false);
+// 		explosionAnimation.anchor.setTo(0.5, 0.5);
+// 		explosionAnimation.animations.add('kaboom');
+// 	}
+// 	ship.bringToTop();
+// 	game.camera.follow(ship);
+// 	game.camera.focusOnXY(0, 0);
+// 	var keys = {
+// 		x: ship.x,
+// 		y: ship.y,
+// 		angle: ship.angle,
+// 		rot: ship.rotation,
+// 		alive: ship.alive,
+// 		shipType: player.shipType
+// 	}
+// 	eurecaServer.handleKeys(keys);
+// }
 
 function removeLogo () {
 	game.input.onDown.remove(removeLogo, this);
@@ -517,6 +500,7 @@ function update () {
 			{
 			
 				var targetShip = shipsList[j].ship;
+				// Destroying ships on collision so collision detection not needed in this version
 				// game.physics.arcade.collide(curShip, targetShip);
 				game.physics.arcade.overlap(curBullets, targetShip, bulletHitPlayer, null, this);
 				game.physics.arcade.overlap(curShip, targetShip, shipsCollide, null, this);
