@@ -57,6 +57,17 @@ var eurecaClientSetup = function() {
 						var style = { font: "48px Arial", fill: "#0f0"};
 						w = game.add.text(viewportWidth/2-120, viewportHeight/2-100, "You win!", style);
 						w.fixedToCamera = true;
+						switch(ship.key){
+							case "ship":
+								setTimeout(function(){ game.add.audio('win1').play() }, 1500)
+								break;
+							case "ship2":
+								setTimeout(function(){ game.add.audio('win2').play() }, 1500)
+								break;
+							case "ship3":
+								setTimeout(function(){ game.add.audio('win3').play('', 0, 1.8) }, 1500)
+								break;
+						}
 					}
 				}
 			}, 1)
@@ -235,6 +246,7 @@ Ship1.prototype.update = function(shipType) {
 	}	
 	if (this.cursor.up)
 	{
+		if(!game.add.audio('thrust1').isPlaying) game.add.audio('thrust1').play('', 0, .2, false, false)
 		this.ship.animations.play('engines')
 		this.ship.body.velocity.x += Math.cos(this.ship.rotation)*10
 		this.ship.body.velocity.y += Math.sin(this.ship.rotation)*10
@@ -273,6 +285,7 @@ Ship1.prototype.fire = function(target) {
 		// This function takes bullets from the extinct bullet pool and allows fire if delay is up
 		if (this.game.time.now > this.nextFire && this.bullets.countDead() > 0)
 		{
+			game.add.audio('fire1').play()
 			this.nextFire = this.game.time.now + this.fireRate;
 			var bullet = this.bullets.getFirstDead();
 			bullet.bringToTop()
@@ -368,6 +381,8 @@ Ship2.prototype.update = function(shipType) {
 			this.ship.x += Math.floor(Math.random()*800) - 400
 			this.ship.y += Math.floor(Math.random()*800) - 400
 			this.nextSpecial = this.game.time.now + this.specialDelay
+			game.add.audio('special2').play()
+
 		}
 	}
 
@@ -393,6 +408,7 @@ Ship2.prototype.fire = function(target) {
 		// This function takes bullets from the extinct bullet pool and 
 		if (this.game.time.now > this.nextFire && this.bullets.countDead() > 0)
 		{
+			game.add.audio('fire2').play()
 			this.nextFire = this.game.time.now + this.fireRate;
 			var bullet = this.bullets.getFirstDead();
 			bullet.bringToTop()
@@ -475,6 +491,7 @@ Ship3.prototype.update = function(shipType) {
 
 	if (this.cursor.up)
 	{
+		if(!game.add.audio('thrust3').isPlaying) game.add.audio('thrust3').play('', 0, .2, false, false)
 		this.ship.animations.play('engines')
 		this.ship.body.velocity.x += Math.cos(this.ship.rotation)*3
 		this.ship.body.velocity.y += Math.sin(this.ship.rotation)*3
@@ -513,6 +530,7 @@ Ship3.prototype.fire = function(target) {
 		// This function takes bullets from the extinct bullet pool, sets them to ship location and fires them.
 		if (this.game.time.now > this.nextFire && this.bullets.countDead() > 0)
 		{
+			game.add.audio('fire3').play()
 			this.nextFire = this.game.time.now + this.fireRate;
 			
 			// For this ship I grab two bullets and use math to position them on either side of 
@@ -545,6 +563,22 @@ var game = new Phaser.Game(viewportWidth, viewportHeight, Phaser.AUTO, 'phaser-e
 
 function preload () {
 
+
+	game.load.audio('fire1', ['assets/audio/fire1.wav']);
+	game.load.audio('fire2', ['assets/audio/fire2.wav']);
+	game.load.audio('fire3', ['assets/audio/fire3.wav']);
+	game.load.audio('hit1', ['assets/audio/hit1.wav']);
+	game.load.audio('hit2', ['assets/audio/hit2.wav']);
+	game.load.audio('hit3', ['assets/audio/hit3.wav']);
+	game.load.audio('shipdies', ['assets/audio/shipdies.wav']);
+	game.load.audio('special2', ['assets/audio/special2.wav']);
+	game.load.audio('thrust1', ['assets/audio/thrust1.wav']);
+	game.load.audio('thrust3', ['assets/audio/thrust3.wav']);
+	game.load.audio('win1', ['assets/audio/win1.wav']);
+	game.load.audio('win2', ['assets/audio/win2.wav']);
+	game.load.audio('win3', ['assets/audio/win3.wav']);
+
+
 	game.load.spritesheet('ship', 'assets/ships1.png', 60, 45);
 	game.load.spritesheet('ship2', 'assets/ships2.png', 64, 64);
 	game.load.spritesheet('ship3', 'assets/ships3b.png', 134, 110);
@@ -554,7 +588,7 @@ function preload () {
 	game.load.image('bullet3', 'assets/bullet3.png');
 	game.load.image('space', 'assets/space.jpg');
 	game.load.spritesheet('kaboom', 'assets/explosion.png', 64, 64, 23);
-	game.load.image('restart','assets/restart.png'); 
+	// game.load.image('restart','assets/restart.png'); 
 }
 
 function menu () {
@@ -619,7 +653,7 @@ function create (shipType, shipString) {
 	ship.h.fixedToCamera = true;
 
 	
-	setTimeout(removeLogo, 2000);
+	// setTimeout(removeLogo, 2000);
 	var keys = {
 		x: ship.x,
 		y: ship.y,
@@ -666,10 +700,10 @@ function create (shipType, shipString) {
 // 	eurecaServer.handleKeys(keys);
 // }
 
-function removeLogo () {
-	game.input.onDown.remove(removeLogo, this);
-	logo.kill();
-}
+// function removeLogo () {
+// 	game.input.onDown.remove(removeLogo, this);
+// 	logo.kill();
+// }
 
 function update () {
 	//do not update if client not ready
@@ -716,6 +750,7 @@ function bulletHitPlayer (ship, bullet) {
 	switch(bullet.key){
 		case "bullet1":
 			shipsList[ship.id].health -= 10
+			game.add.audio('hit1').play('', 0, .3)
 			if(ship.h){ship.h.destroy()
 				var health = "Health: " + player.health;
 				var style = { font: "16px Arial", fill: "#ddd"};
@@ -725,6 +760,7 @@ function bulletHitPlayer (ship, bullet) {
 			break;
 		case "bullet2":
 			shipsList[ship.id].health -= 2
+			game.add.audio('hit2').play('', 0, .5)
 			if(ship.h){ship.h.destroy()
 				var health = "Health: " + player.health;
 				var style = { font: "16px Arial", fill: "#ddd"};
@@ -734,6 +770,7 @@ function bulletHitPlayer (ship, bullet) {
 			break;
 		case "bullet3":
 			shipsList[ship.id].health -= 20
+			game.add.audio('hit3').play()
 			if(ship.h){ship.h.destroy()
 				var health = "Health: " + player.health;
 				var style = { font: "16px Arial", fill: "#ddd"};
@@ -749,6 +786,7 @@ function bulletHitPlayer (ship, bullet) {
 		explosionAnimation.reset(ship.x, ship.y);
 		explosionAnimation.play('kaboom', 30, false, true);
 		setTimeout(function(){eurecaServer.deletePlayer(ship.id)},40)
+		game.add.audio('shipdies').play('', 0, .7)
 	}
 
 }
@@ -760,6 +798,7 @@ function shipsCollide (ship, curShip) {
 		explosionAnimation.reset(ship.x, ship.y);
 		explosionAnimation.play('kaboom', 30, false, true);
 	},40)
+	game.add.audio('shipdies').play('', 0, .7)
 }
 
 function restart () {
