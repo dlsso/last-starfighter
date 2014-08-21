@@ -611,6 +611,9 @@ function menu () {
 
 
 function create (shipType, shipString) {
+
+
+
 	//  Resize our game world
 	game.world.setBounds(0, 0, 1920, 1080);
 	game.stage.disableVisibilityChange  = true;
@@ -648,7 +651,7 @@ function create (shipType, shipString) {
 	fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
 	var health = "Health: " + player.health;
-	var style = { font: "16px Arial", fill: "#ddd"};
+	var style = { font: "18px Arial", fill: "#ddd"};
 	ship.h = game.add.text(10, 20, health, style);
 	ship.h.fixedToCamera = true;
 
@@ -665,6 +668,11 @@ function create (shipType, shipString) {
 	eurecaServer.handleKeys(keys);
 	eurecaServer.handshake(shipString);
 	ready = true;
+
+	// Remove menu buttons
+	chooseShip1.kill();
+	chooseShip2.kill();
+	chooseShip3.kill();
 }
 
 //	Not using respawn in this version
