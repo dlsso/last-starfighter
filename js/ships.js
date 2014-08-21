@@ -280,9 +280,12 @@ Ship1.prototype.fire = function(target) {
 			// Using sin and cos to add offset in direction ship is facing
 			bullet.reset(this.ship.x + Math.cos(this.ship.rotation)*30, this.ship.y + Math.sin(this.ship.rotation)*30);
 
+			// Rotate the sprite
 			bullet.rotation = this.ship.rotation;
+			// Set the bullet speed and direction
 			game.physics.arcade.velocityFromRotation(this.ship.rotation, 800, bullet.body.velocity);
-			setTimeout(function(){bullet.kill()},600)
+			// Destroy the bullet after a certain time to limit range 
+			setTimeout(function(){ bullet.kill() }, 600)
 		}
 }
 
@@ -407,7 +410,7 @@ Ship2.prototype.fire = function(target) {
 function Ship3(myId, game, ship, x, y) {
 	Ship.call(this, myId, game, ship)
 	this.health = 100;
-	this.fireRate = 300;
+	this.fireRate = 600;
 	this.specialDelay = 2000;
 	this.shipType = 'ship3'
 	this.ship = game.add.sprite(x, y, 'ship3');
@@ -417,7 +420,7 @@ function Ship3(myId, game, ship, x, y) {
 	this.ship.id = myId;
 	game.physics.enable(this.ship, Phaser.Physics.ARCADE);
 	this.ship.body.immovable = false;
-	this.ship.body.drag.setTo(50);
+	this.ship.body.drag.setTo(40);
 	this.ship.body.maxVelocity.setTo(220);
 	this.ship.body.bounce.setTo(0, 0);
 	this.ship.angle = -90;
@@ -462,12 +465,12 @@ Ship3.prototype.update = function(shipType) {
 
 	if (this.cursor.left)
 	{
-		this.ship.angle -= 2;
+		this.ship.angle -= 1.5;
 	}
 
 	else if (this.cursor.right)
 	{
-		this.ship.angle += 2;
+		this.ship.angle += 1.5;
 	}
 
 	if (this.cursor.up)
@@ -507,19 +510,33 @@ Ship3.prototype.update = function(shipType) {
 };
 Ship3.prototype.fire = function(target) {
 		if (!this.alive) return;
-		// This function takes bullets from the extinct bullet pool and 
+		// This function takes bullets from the extinct bullet pool, sets them to ship location and fires them.
 		if (this.game.time.now > this.nextFire && this.bullets.countDead() > 0)
 		{
 			this.nextFire = this.game.time.now + this.fireRate;
-			var bullet = this.bullets.getFirstDead();
-			bullet.bringToTop()
 			
-			// Using sin and cos to add offset in direction ship is facing
-			bullet.reset(this.ship.x + Math.cos(this.ship.rotation)*30, this.ship.y + Math.sin(this.ship.rotation)*30);
+			// For this ship I grab two bullets and use math to position them on either side of 
+			// the ship and toward the front, then fire them.
+			var bullet1 = this.bullets.getFirstDead();
+			bullet1.bringToTop();
+			bullet1.reset(
+				this.ship.x + Math.cos(this.ship.rotation)*35 +Math.sin(this.ship.rotation)*40,
+				this.ship.y + Math.sin(this.ship.rotation)*35 -Math.cos(this.ship.rotation)*40
+			);
+			bullet1.rotation = this.ship.rotation;
+			game.physics.arcade.velocityFromRotation(this.ship.rotation, 1000, bullet1.body.velocity);
+			setTimeout(function(){bullet1.kill()},800);
+			
+			var bullet2 = this.bullets.getFirstDead();
+			bullet2.bringToTop()
+			bullet2.reset(
+				this.ship.x + Math.cos(this.ship.rotation)*35 -Math.sin(this.ship.rotation)*40,
+				this.ship.y + Math.sin(this.ship.rotation)*35 +Math.cos(this.ship.rotation)*40
+			);
+			bullet2.rotation = this.ship.rotation;
+			game.physics.arcade.velocityFromRotation(this.ship.rotation, 1000, bullet2.body.velocity);
+			setTimeout(function(){bullet2.kill()},800)
 
-			bullet.rotation = this.ship.rotation;
-			game.physics.arcade.velocityFromRotation(this.ship.rotation, 1000, bullet.body.velocity);
-			setTimeout(function(){bullet.kill()},800)
 		}
 }
 
@@ -583,10 +600,12 @@ function create (shipType, shipString) {
 		explosionAnimation.anchor.setTo(0.5, 0.5);
 		explosionAnimation.animations.add('kaboom');
 	}
-		
-	logo = game.add.sprite(viewportWidth/2 - 200, viewportHeight/3 - 85, 'logo');
-	logo.fixedToCamera = true;
-	game.input.onDown.add(removeLogo, this);
+
+	//	Logo is in menu now
+	//=============================================================================	
+	// logo = game.add.sprite(viewportWidth/2 - 200, viewportHeight/3 - 85, 'logo');
+	// logo.fixedToCamera = true;
+	// game.input.onDown.add(removeLogo, this);
 
 	game.camera.follow(ship);
 	game.camera.focusOnXY(0, 0);
@@ -614,7 +633,7 @@ function create (shipType, shipString) {
 	ready = true;
 }
 
-//	Not using this function in this version
+//	Not using respawn in this version
 //=============================================================================
 // function respawn (shipType) {
 // 	land = game.add.tileSprite(0, 0, viewportWidth, viewportHeight, 'space');
