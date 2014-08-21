@@ -246,7 +246,9 @@ Ship1.prototype.update = function(shipType) {
 	}	
 	if (this.cursor.up)
 	{
-		if(!game.add.audio('thrust1').isPlaying) game.add.audio('thrust1').play('', 0, .2, false, false)
+		// If statement doesn't work as play appears to be asynch
+		// if(!game.add.audio('thrust1').isPlaying)
+		game.add.audio('thrust1').play('', 0, .2, false, false)
 		this.ship.animations.play('engines')
 		this.ship.body.velocity.x += Math.cos(this.ship.rotation)*10
 		this.ship.body.velocity.y += Math.sin(this.ship.rotation)*10
@@ -491,7 +493,9 @@ Ship3.prototype.update = function(shipType) {
 
 	if (this.cursor.up)
 	{
-		if(!game.add.audio('thrust3').isPlaying) game.add.audio('thrust3').play('', 0, .2, false, false)
+		// If statement doesn't work as play appears to be asynch
+		// if(!game.add.audio('thrust3').isPlaying)
+		game.add.audio('thrust3').play('', 0, .2, false, false)
 		this.ship.animations.play('engines')
 		this.ship.body.velocity.x += Math.cos(this.ship.rotation)*3
 		this.ship.body.velocity.y += Math.sin(this.ship.rotation)*3
