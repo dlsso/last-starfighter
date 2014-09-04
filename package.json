@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "engine.io": "^1.4.0",
+    "eureca.io": "^0.6.1",
+    "express": "^4.8.7"
+  }
+}
